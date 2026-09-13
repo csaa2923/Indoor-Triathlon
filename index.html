@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Studio Tri">
+<meta name="description" content="Professioneller Indoor-Triathlon-Timer für Rudergerät, Fahrradergometer und Laufband. Zeiten, Wechsel und Ergebnisse bleiben lokal.">
+<title>Studio Tri · Indoor Triathlon</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#0a0c10;
+  --surface:#12151c;
+  --surface-2:#1a1e28;
+  --text:#f3f5f8;
+  --muted:#8b93a7;
+  --line:#2a3140;
+  --accent:#3dd68c;
+  --accent-ink:#06281a;
+  --row:#6ea8ff;
+  --bike:#f0b429;
+  --run:#ff7a59;
+  --danger:#ef4444;
+  --danger-ink:#fff;
+  --ok:#3dd68c;
+  --radius:18px;
+  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","Consolas",monospace;
+  --pad:max(16px, env(safe-area-inset-left));
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);min-height:100%}
+body{
+  min-height:100dvh;
+  background:
+    radial-gradient(900px 420px at 50% -80px, rgba(61,214,140,.12), transparent 60%),
+    var(--bg);
+}
+.skip{
+  position:absolute;left:-999px;top:8px;background:var(--accent);color:var(--accent-ink);
+  padding:8px 12px;border-radius:8px;z-index:20
+}
+.skip:focus{left:12px}
+.app{
+  display:flex;flex-direction:column;gap:14px;
+  max-width:760px;margin:0 auto;
+  padding:max(12px, env(safe-area-inset-top)) var(--pad) max(28px, env(safe-area-inset-bottom));
+}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;order:0}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.wordmark{font-weight:800;letter-spacing:.14em;font-size:13px;color:var(--accent)}
+.brand h1{margin:0;font-size:22px;letter-spacing:-.03em}
+.tools{display:flex;gap:8px;flex-shrink:0}
+.iconbtn{
+  width:42px;height:42px;border:1px solid var(--line);background:var(--surface);
+  color:var(--text);border-radius:12px;padding:0;display:grid;place-items:center;cursor:pointer
+}
+.iconbtn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.iconbtn svg{width:20px;height:20px}
+.hud{
+  order:3;background:var(--surface);border:1px solid var(--line);border-radius:24px;
+  padding:20px 18px 18px;text-align:center
+}
+.kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.phase{margin:8px 0 0;font-size:28px;font-weight:800;letter-spacing:-.03em}
+.clock{
+  font-family:var(--mono);font-size:clamp(42px,12vw,64px);font-weight:800;
+  font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1.05;margin:8px 0 14px
+}
+.clock.is-live{color:var(--accent)}
+.splits{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;
+  margin:0 0 16px;text-align:center
+}
+.split{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
+.split span{display:block;color:var(--muted);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.split strong{display:block;margin-top:4px;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.split.is-on{border-color:currentColor}
+.split[data-k="row"].is-on{color:var(--row)}
+.split[data-k="bike"].is-on{color:var(--bike)}
+.split[data-k="run"].is-on{color:var(--run)}
+.split[data-k="t1"].is-on,.split[data-k="t2"].is-on{color:var(--accent)}
+.cta{
+  width:100%;min-height:58px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);
+  font-size:18px;font-weight:800;cursor:pointer
+}
+.cta:disabled{opacity:.55;cursor:default}
+.btnrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+button{
+  border:0;border-radius:12px;padding:11px 15px;font-size:15px;font-weight:700;
+  font-family:inherit;cursor:pointer;color:var(--text)
+}
+.secondary{background:var(--surface-2);border:1px solid var(--line)}
+.danger{background:var(--danger);color:var(--danger-ink)}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.status{margin:12px 0 0;color:var(--muted);font-size:14px;line-height:1.45;min-height:2.8em}
+.stepper{order:4;display:flex;gap:6px;align-items:center;overflow:auto;padding:2px}
+.step{flex:1;min-width:52px;text-align:center;font-size:11px;color:var(--muted);font-weight:700}
+.step i{
+  display:block;height:4px;border-radius:99px;background:var(--line);margin-bottom:6px
+}
+.step.is-done i{background:var(--accent)}
+.step.is-on{color:var(--text)}
+.step.is-on i{background:var(--accent)}
+.plan{order:2;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.legs,.board{order:5}
+.board{order:6}
+body.is-live .hud{order:1}
+body.is-live .stepper{order:2}
+body.is-live .legs{order:3}
+body.is-live .plan{order:4}
+h2{margin:0 0 12px;font-size:16px;letter-spacing:-.02em}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.preset{
+  background:var(--surface-2);border:1px solid var(--line);border-radius:14px;
+  text-align:left;min-height:74px;padding:12px
+}
+.preset small{display:block;color:var(--muted);font-weight:500;margin-top:5px;font-size:12px}
+.preset[aria-pressed="true"]{border-color:var(--accent);background:#123226;color:var(--text)}
+.summary{
+  margin-top:12px;padding:11px 12px;border-left:3px solid var(--accent);
+  border-radius:10px;background:#10261c;font-size:14px;line-height:1.5
+}
+.summary.error{border-color:var(--danger);background:#2a1618}
+.hint{color:var(--muted);font-size:13px;line-height:1.45;margin:10px 0 0}
+.panel,.leg{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:12px
+}
+.leg.is-on{box-shadow:inset 3px 0 0 currentColor}
+.leg[data-leg="row"].is-on{color:var(--row)}
+.leg[data-leg="bike"].is-on{color:var(--bike)}
+.leg[data-leg="run"].is-on{color:var(--run)}
+.leg.is-done{opacity:.88}
+.leg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;color:var(--text)}
+.leg-index{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:800}
+.leg-time{font-family:var(--mono);font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+input{
+  width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);
+  background:#0d1016;color:var(--text);font-size:16px;outline:none;font-family:inherit
+}
+input:focus{border-color:var(--accent)}
+.pace-pair{display:flex;align-items:center;gap:7px}
+.pace-pair input{width:70px;text-align:center}
+.calc{margin-top:12px;padding:11px 12px;border-left:3px solid var(--accent);border-radius:10px;background:#10261c;font-size:14px;line-height:1.5;color:var(--text)}
+.calc.error{border-color:var(--danger);background:#2a1618}
+.smallbtn{padding:10px 12px;font-size:13px}
+details{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--text)}
+summary{cursor:pointer;color:var(--accent);font-weight:700}
+details ol{padding-left:22px;font-size:14px;line-height:1.5;color:#d5dceb}
+details li{margin:6px 0}
+a{color:#8ee4b8}
+.result{background:#0d1016;border:1px solid var(--line);border-radius:16px;padding:6px 16px}
+.row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px}
+.row:last-child{border:0}
+.row.total{font-size:18px;font-weight:800}
+.row small{display:block;color:var(--muted);font-weight:500;font-size:12px;margin-top:3px}
+.history-entry{border-bottom:1px solid var(--line);padding:12px 0;line-height:1.5;color:var(--text)}
+.history-entry .meta{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.best{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;margin-top:8px}
+.banner{
+  order:1;display:none;background:#123226;border:1px solid #245c44;color:#d8f5e6;
+  border-radius:14px;padding:10px 12px;font-size:13px
+}
+.banner.is-on{display:block}
+.modal{
+  border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--text);
+  padding:20px;width:min(420px, calc(100vw - 32px))
+}
+.modal::backdrop{background:rgba(0,0,0,.62)}
+.modal p{margin:0 0 16px;line-height:1.45}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:560px){
+  .fields{grid-template-columns:1fr}
+  .splits{grid-template-columns:repeat(3,1fr)}
+  .split[data-k="t1"],.split[data-k="t2"]{grid-column:span 1}
+  .clock{font-size:48px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#raceAction">Zum Trainingsknopf</a>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="wordmark">STUDIO TRI</div>
+      <h1>Indoor Triathlon</h1>
+    </div>
+    <div class="tools">
+      <button type="button" class="iconbtn" id="soundBtn" aria-pressed="true" aria-label="Ton und Vibration" title="Ton und Vibration">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/></svg>
+      </button>
+      <button type="button" class="iconbtn" id="fullBtn" aria-label="Vollbild" title="Vollbild">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="banner" id="restoreBanner" hidden></div>
+
+  <section class="plan" id="planBox" aria-labelledby="planTitle">
+    <h2 id="planTitle">Strecke</h2>
+    <div class="presets">
+      <button type="button" class="preset" data-preset="studio">Studio-Start<small>2.000 m · 10 km · 5 km</small></button>
+      <button type="button" class="preset" data-preset="beginner">Einsteiger<small>1.000 m · 5 km · 2,5 km</small></button>
+      <button type="button" class="preset" data-preset="sprint">Sprint<small>2.000 m · 20 km · 5 km</small></button>
+      <button type="button" class="preset" data-preset="competition">Wettkampf<small>2.000 m · 40 km · 10 km</small></button>
+    </div>
+    <div class="summary" id="planSummary"></div>
+    <p class="hint">Eigenes Studio-Format: statt Schwimmen wird gerudert. Sprint- und Wettkampf-Rad/Lauf entsprechen den offiziellen Distanzen. Werte sind in den Disziplinen änderbar.</p>
+    <details>
+      <summary>Name auf dem Ergebnis</summary>
+      <div class="fields" style="grid-template-columns:1fr">
+        <div>
+          <label for="athlete">Athlet / Athletin</label>
+          <input id="athlete" type="text" maxlength="60" placeholder="Optional" autocomplete="name">
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="hud" aria-labelledby="hudPhase">
+    <div class="kicker" id="hudKicker">Gesamtzeit</div>
+    <div class="phase" id="hudPhase">Bereit</div>
+    <div class="clock" id="totalClock">00:00:00</div>
+    <div class="splits" aria-label="Zwischenzeiten">
+      <div class="split" data-k="row"><span>Rudern</span><strong id="sRow">00:00:00</strong></div>
+      <div class="split" data-k="t1"><span>T1</span><strong id="sT1">00:00:00</strong></div>
+      <div class="split" data-k="bike"><span>Rad</span><strong id="sBike">00:00:00</strong></div>
+      <div class="split" data-k="t2"><span>T2</span><strong id="sT2">00:00:00</strong></div>
+      <div class="split" data-k="run"><span>Lauf</span><strong id="sRun">00:00:00</strong></div>
+    </div>
+    <button type="button" class="cta" id="raceAction">Rudern starten</button>
+    <div class="btnrow" style="margin-top:10px">
+      <button type="button" class="secondary" id="pauseBtn">Pause</button>
+      <button type="button" class="ghost" id="resetBtn">Reset</button>
+    </div>
+    <p class="status" id="phaseStatus" role="status">Bereit. Distanz wählen, dann starten. Die Gesamtzeit läuft auch in den Wechseln.</p>
+    <p class="hint" id="raceHint">Leertaste startet oder beendet die aktuelle Disziplin, wenn kein Feld fokussiert ist.</p>
+  </section>
+
+  <nav class="stepper" aria-label="Wettkampfphasen">
+    <div class="step" data-step="1"><i></i>Rudern</div>
+    <div class="step" data-step="2"><i></i>T1</div>
+    <div class="step" data-step="3"><i></i>Rad</div>
+    <div class="step" data-step="4"><i></i>T2</div>
+    <div class="step" data-step="5"><i></i>Lauf</div>
+  </nav>
+
+  <div class="legs">
+    <section class="leg" id="leg-row" data-leg="row">
+      <div class="leg-head">
+        <div>
+          <span class="leg-index">01</span>
+          <h2>Rudern</h2>
+        </div>
+        <div class="leg-time" id="rowClock">00:00:00</div>
+      </div>
+      <div class="fields">
+        <div><label for="rowGoal">Zielstrecke (m)</label><input id="rowGoal" type="number" inputmode="numeric" min="100" max="50000" step="100" value="2000"></div>
+        <div><label for="rowDist">Tatsächlich (m)</label><input id="rowDist" type="number" inputmode="numeric" min="0" step="1" placeholder="Nach dem Rudern"></div>
+        <div>
+          <label for="paceMin">Rechen-Pace / 500 m</label>
+          <div class="pace-pair">
+            <input id="paceMin" type="number" min="0" max="30" step="1" value="2" aria-label="Minuten">
+            <span>:</span>
+            <input id="paceSec" type="number" min="0" max="59" step="1" value="30" aria-label="Sekunden">
+          </div>
+        </div>
+      </div>
+      <div class="calc" id="rowCalc" aria-live="polite"></div>
+      <div class="btnrow" style="margin-top:12px">
+        <button type="button" class="secondary smallbtn" data-start="row">Start</button>
+        <button type="button" class="secondary smallbtn" data-stop="row">Stopp / Wechsel</button>
+        <button type="button" class="secondary smallbtn" data-finish="row">Ziel erreicht</button>
+      </div>
+      <details>
+        <summary>Rudergerät einstellen</summary>
+        <ol>
+          <li>Concept2 PM5 für 2.000 m: <strong>Select Workout → Standard List → 2000m</strong>. Andere Strecke: <strong>Select Workout → New Workout → Single Distance</strong>.</li>
+          <li>Andere Geräte: Modus „Distanz“, dieselbe Zielstrecke.</li>
+          <li>Widerstand nach Gefühl. Er steuert das Zuggewicht, nicht die Zeit.</li>
+          <li>Der Monitor zeigt Pace in min/500 m. 2:30/500 m sind rechnerisch 10 Minuten auf 2.000 m.</li>
+          <li>Strecke am Gerät ablesen. Diese App verbindet sich nicht mit dem Monitor.</li>
+        </ol>
+      </details>
+    </section>
+
+    <section class="leg" id="leg-bike" data-leg="bike">
+      <div class="leg-head">
+        <div>
+          <span class="leg-index">02</span>
+          <h2>Fahrrad</h2>
+        </div>
+        <div class="leg-time" id="bikeClock">00:00:00</div>
+      </div>
+      <div class="fields">
+        <div><label for="bikeGoal">Zielstrecke (km)</label><input id="bikeGoal" type="number" inputmode="decimal" min="0.1" max="500" step="0.1" value="10"></div>
+        <div><label for="bikeSpeed">Geplante Geschwindigkeit (km/h)</label><input id="bikeSpeed" type="number" inputmode="decimal" min="1" max="100" step="0.1" value="20"></div>
+        <div><label for="bikeWish">Wunschzeit (Minuten, optional)</label><input id="bikeWish" type="number" inputmode="decimal" min="1" max="1440" step="0.5" placeholder="z. B. 30"></div>
+        <div><label for="bikeDist">Tatsächlich (km)</label><input id="bikeDist" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Nach dem Radfahren"></div>
+      </div>
+      <div class="calc" id="bikeCalc" aria-live="polite"></div>
+      <p class="hint">Widerstand selbst wählen. Keine automatische Steuerung des Ergometers.</p>
+      <div class="btnrow" style="margin-top:12px">
+        <button type="button" class="secondary smallbtn" data-start="bike">Start</button>
+        <button type="button" class="secondary smallbtn" data-stop="bike">Stopp / Wechsel</button>
+        <button type="button" class="secondary smallbtn" data-finish="bike">Ziel erreicht</button>
+      </div>
+    </section>
+
+    <section class="leg" id="leg-run" data-leg="run">
+      <div class="leg-head">
+        <div>
+          <span class="leg-index">03</span>
+          <h2>Laufband</h2>
+        </div>
+        <div class="leg-time" id="runClock">00:00:00</div>
+      </div>
+      <div class="fields">
+        <div><label for="runGoal">Zielstrecke (km)</label><input id="runGoal" type="number" inputmode="decimal" min="0.1" max="100" step="0.1" value="5"></div>
+        <div><label for="runSpeed">Geplante Geschwindigkeit (km/h)</label><input id="runSpeed" type="number" inputmode="decimal" min="1" max="30" step="0.1" value="8"></div>
+        <div><label for="runWish">Wunschzeit (Minuten, optional)</label><input id="runWish" type="number" inputmode="decimal" min="1" max="1440" step="0.5" placeholder="z. B. 35"></div>
+        <div><label for="runDist">Tatsächlich (km)</label><input id="runDist" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Nach dem Laufen"></div>
+        <div><label for="incline">Steigung (%)</label><input id="incline" type="number" inputmode="decimal" min="0" max="15" step="0.5" value="0"></div>
+      </div>
+      <div class="calc" id="runCalc" aria-live="polite"></div>
+      <p class="hint">Steigung ist keine offizielle Vorgabe. Distanz am Laufband prüfen.</p>
+      <div class="btnrow" style="margin-top:12px">
+        <button type="button" class="secondary smallbtn" data-start="run">Start</button>
+        <button type="button" class="secondary smallbtn" data-stop="run">Stopp</button>
+        <button type="button" class="secondary smallbtn" data-finish="run">Ziel erreicht</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="board" aria-labelledby="resultTitle">
+    <div class="panel" style="margin:0">
+      <h2 id="resultTitle">Ergebnis</h2>
+      <div class="result">
+        <div class="row"><span>Rudern<small id="rRowMeta">–</small></span><strong id="rRow">–</strong></div>
+        <div class="row"><span>Wechsel T1</span><strong id="rT1">00:00:00</strong></div>
+        <div class="row"><span>Fahrrad<small id="rBikeMeta">–</small></span><strong id="rBike">–</strong></div>
+        <div class="row"><span>Wechsel T2</span><strong id="rT2">00:00:00</strong></div>
+        <div class="row"><span>Laufband<small id="rRunMeta">–</small></span><strong id="rRun">–</strong></div>
+        <div class="row"><span>Weitere Wechsel / Vorbereitung</span><strong id="rOther">00:00:00</strong></div>
+        <div class="row total"><span>Gesamt</span><strong id="rTotal">00:00:00</strong></div>
+      </div>
+      <div class="btnrow" style="margin-top:14px">
+        <button type="button" class="cta" id="saveBtn" style="width:auto;min-height:46px;padding:12px 18px">Ergebnis speichern</button>
+        <button type="button" class="secondary" id="shareBtn">Teilen</button>
+        <button type="button" class="secondary" id="historyBtn">Verlauf</button>
+      </div>
+      <div id="historyBox" class="hint"></div>
+    </div>
+  </section>
+
+  <footer>
+    Alle Daten bleiben in diesem Browser. Keine Geräteverbindung.<br>
+    Quellen:
+    <a href="https://www.triathlonquebec.org/wp-content/uploads/2026/03/World-Triathlon_Competition-Rules_2026.pdf" target="_blank" rel="noopener noreferrer">World Triathlon, Regeln 2026 (Anhang A)</a>
+    ·
+    <a href="https://www.concept2.com/support/monitors/pm5/how-to-use" target="_blank" rel="noopener noreferrer">Concept2 PM5</a>
+  </footer>
+</div>
+
+<dialog class="modal" id="confirmDialog">
+  <form method="dialog">
+    <p id="confirmText"></p>
+    <div class="btnrow">
+      <button type="submit" value="cancel" class="secondary">Abbrechen</button>
+      <button type="submit" value="ok" class="danger" id="confirmOk">Bestätigen</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const legs = {
+  row: {elapsed:0, start:null, running:false, clock:'rowClock'},
+  bike:{elapsed:0, start:null, running:false, clock:'bikeClock'},
+  run: {elapsed:0, start:null, running:false, clock:'runClock'}
+};
+let total = {elapsed:0, start:null, running:false};
+const presets = {
+  studio:{label:'Studio-Start', row:2000, bike:10, run:5},
+  beginner:{label:'Einsteiger', row:1000, bike:5, run:2.5},
+  sprint:{label:'Sprint', row:2000, bike:20, run:5},
+  competition:{label:'Wettkampf', row:2000, bike:40, run:10}
+};
+const settingIds = ['rowGoal','bikeGoal','runGoal','paceMin','paceSec','bikeSpeed','bikeWish','runSpeed','runWish','incline'];
+const settingKey = 'indoorTriathlonSettingsV2';
+const sessionKey = 'indoorTriathlonActiveSessionV1';
+const historyKey = 'indoorTriathlonHistory';
+const $ = id => document.getElementById(id);
+let selectedPreset = 'studio';
+let raceStage = 0;
+let splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
+let soundOn = true;
+let wakeLock = null;
+let restored = false;
+
+const names = {row:'Rudern', bike:'Radfahren', run:'Laufen'};
+const shortNames = {row:'Rudern', bike:'Rad', run:'Lauf'};
+
+function num(id){
+  const s = $(id).value.trim().replace(',', '.');
+  return s === '' ? NaN : Number(s);
+}
+function valid(id, min, max){
+  const x = num(id);
+  return Number.isFinite(x) && x >= min && x <= max ? x : null;
+}
+function fmt(ms){
+  const s = Math.floor(Math.max(0, Number(ms) || 0) / 1000);
+  return [Math.floor(s/3600), Math.floor(s%3600/60), s%60].map(x => String(x).padStart(2,'0')).join(':');
+}
+function de(n, places=1){
+  return new Intl.NumberFormat('de-DE', {maximumFractionDigits:places}).format(n);
+}
+function current(obj){
+  return obj.elapsed + (obj.running ? Math.max(0, Date.now() - obj.start) : 0);
+}
+function status(text){ $('phaseStatus').textContent = text; }
+function liveTransition(){
+  if (splits.pendingAt == null) return 0;
+  return Math.max(0, current(total) - splits.pendingAt);
+}
+function t1Now(){ return splits.t1 + (splits.pendingFrom === 'row' ? liveTransition() : 0); }
+function t2Now(){ return splits.t2 + (splits.pendingFrom === 'bike' ? liveTransition() : 0); }
+function otherNow(){
+  return Math.max(0, current(total) - current(legs.row) - current(legs.bike) - current(legs.run) - t1Now() - t2Now());
+}
+
+function ask(text, okLabel='Bestätigen', danger=true){
+  return new Promise(resolve => {
+    const dlg = $('confirmDialog');
+    $('confirmText').textContent = text;
+    const ok = $('confirmOk');
+    ok.textContent = okLabel;
+    ok.className = danger ? 'danger' : 'cta';
+    ok.style.width = 'auto';
+    ok.style.minHeight = '44px';
+    const onClose = () => {
+      dlg.removeEventListener('close', onClose);
+      resolve(dlg.returnValue === 'ok');
+    };
+    dlg.addEventListener('close', onClose);
+    dlg.showModal();
+  });
+}
+
+function cue(){
+  if (!soundOn) return;
+  try { navigator.vibrate?.(140); } catch (_) {}
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.07, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.16);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.16);
+  } catch (_) {}
+}
+
+async function syncWakeLock(){
+  try {
+    if (!('wakeLock' in navigator)) return;
+    if (total.running) {
+      if (!wakeLock || wakeLock.released) wakeLock = await navigator.wakeLock.request('screen');
+    } else if (wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  } catch (_) {}
+}
+
+function saveSession(){
+  try {
+    localStorage.setItem(sessionKey, JSON.stringify({
+      version:1,
+      total,
+      legs: Object.fromEntries(Object.entries(legs).map(([k,l]) => [k, {elapsed:l.elapsed, start:l.start, running:l.running}])),
+      actual: Object.fromEntries(['rowDist','bikeDist','runDist'].map(id => [id, $(id).value])),
+      raceStage,
+      splits
+    }));
+  } catch (_) {
+    status('Hinweis: Dieser Browser kann den laufenden Stand nicht speichern.');
+  }
+}
+
+function restoreSession(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(sessionKey) || 'null');
+    if (!saved || saved.version !== 1 || !saved.total || !saved.legs) return;
+    const restoreClock = (target, source) => {
+      if (!source || !Number.isFinite(source.elapsed) || source.elapsed < 0 || source.elapsed > 30*86400000) return;
+      const running = source.running === true && Number.isFinite(source.start) && source.start > 0 && source.start <= Date.now();
+      target.elapsed = source.elapsed;
+      target.start = running ? source.start : null;
+      target.running = running;
+    };
+    restoreClock(total, saved.total);
+    for (const k of Object.keys(legs)) restoreClock(legs[k], saved.legs[k]);
+    if (!total.running) {
+      for (const l of Object.values(legs)) {
+        if (l.running) {
+          l.elapsed += Math.max(0, Date.now() - l.start);
+          l.running = false;
+          l.start = null;
+        }
+      }
+    }
+    for (const id of ['rowDist','bikeDist','runDist']) {
+      if (saved.actual?.[id] != null) $(id).value = String(saved.actual[id]);
+    }
+    raceStage = Number.isInteger(saved.raceStage) && saved.raceStage >= 0 && saved.raceStage <= 7 ? saved.raceStage : 0;
+    if (saved.splits && Number.isFinite(saved.splits.t1) && Number.isFinite(saved.splits.t2)) {
+      splits = {
+        t1: Math.max(0, saved.splits.t1),
+        t2: Math.max(0, saved.splits.t2),
+        pendingFrom: ['row','bike'].includes(saved.splits.pendingFrom) ? saved.splits.pendingFrom : null,
+        pendingAt: Number.isFinite(saved.splits.pendingAt) ? saved.splits.pendingAt : null
+      };
+    }
+    if (current(total) > 0) {
+      restored = true;
+      const banner = $('restoreBanner');
+      banner.hidden = false;
+      banner.classList.add('is-on');
+      banner.textContent = total.running
+        ? 'Laufendes Training wiederhergestellt. Display bleibt an, solange die Zeit läuft.'
+        : 'Pausiertes Training wiederhergestellt.';
+      status(total.running ? 'Training läuft weiter · Zeit wurde wiederhergestellt' : 'Pausiertes Training wiederhergestellt');
+    }
+  } catch (_) {}
+}
+
+function goal(k){
+  return valid(k + 'Goal', k === 'row' ? 100 : 0.1, k === 'row' ? 50000 : k === 'bike' ? 500 : 100);
+}
+function calc(id, text, error=false){
+  $(id).textContent = text;
+  $(id).classList.toggle('error', error);
+}
+function planned(){
+  const g = goal('row'), m = valid('paceMin', 0, 30), s = valid('paceSec', 0, 59);
+  const row = (g != null && m != null && s != null && (m > 0 || s > 0)) ? (m*60+s)*g/500*1000 : null;
+  const parts = {row};
+  for (const k of ['bike','run']) {
+    const dist = goal(k), speed = valid(k+'Speed', 1, k === 'bike' ? 100 : 30);
+    parts[k] = (dist != null && speed != null) ? dist/speed*3600000 : null;
+  }
+  parts.total = [parts.row, parts.bike, parts.run].every(x => x != null) ? parts.row + parts.bike + parts.run : null;
+  return parts;
+}
+function distLabel(k, value){
+  if (value == null || value === '') return '–';
+  return k === 'row' ? de(Number(value), 0) + ' m' : de(Number(String(value).replace(',', '.')), 2) + ' km';
+}
+
+function updateCalculators(){
+  const g = goal('row'), m = valid('paceMin', 0, 30), s = valid('paceSec', 0, 59);
+  if (g == null || m == null || s == null || (m === 0 && s === 0)) {
+    calc('rowCalc', 'Gültige Distanz und Pace (min:sek / 500 m) eingeben.', true);
+  } else {
+    calc('rowCalc', 'Bei ' + m + ':' + String(s).padStart(2,'0') + ' min/500 m: ca. ' + fmt((m*60+s)*g/500*1000) + ' für ' + de(g,0) + ' m.');
+  }
+  for (const k of ['bike','run']) {
+    const dist = goal(k), speed = valid(k+'Speed', 1, k === 'bike' ? 100 : 30);
+    const wish = $(k+'Wish').value.trim() === '' ? null : valid(k+'Wish', 1, 1440);
+    if (dist == null || speed == null || ($(k+'Wish').value.trim() !== '' && wish == null)) {
+      calc(k+'Calc', 'Gültige Strecke, Geschwindigkeit und gegebenenfalls Wunschzeit eingeben.', true);
+      continue;
+    }
+    const pace = k === 'run' ? ' · Pace ' + fmt(3600000/speed).slice(3) + ' min/km' : '';
+    const target = wish == null ? '' : ' · Für ' + de(wish) + ' min: ' + de(dist*60/wish, 2) + ' km/h.';
+    calc(k+'Calc', 'Bei ' + de(speed) + ' km/h: ca. ' + fmt(dist/speed*3600000) + ' für ' + de(dist) + ' km' + pace + target);
+  }
+  const plan = planned();
+  const label = presets[selectedPreset]?.label || 'Individuell';
+  $('planSummary').textContent = label + ': ' +
+    (goal('row') == null ? '–' : de(goal('row'),0)) + ' m Rudern · ' +
+    (goal('bike') == null ? '–' : de(goal('bike'))) + ' km Rad · ' +
+    (goal('run') == null ? '–' : de(goal('run'))) + ' km Lauf' +
+    (plan.total == null ? '' : ' · Planzeit ca. ' + fmt(plan.total) + ' ohne Wechsel');
+  document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === selectedPreset)));
+}
+
+function updateRaceChrome(){
+  const phases = ['Bereit','Rudern','Wechsel T1','Radfahren','Wechsel T2','Laufen','Ziel','Gespeichert'];
+  $('hudPhase').textContent = phases[raceStage] || 'Bereit';
+  const currentLeg = {1:'row',3:'bike',5:'run'}[raceStage];
+  const labels = [
+    'Rudern starten', null, 'Rad starten', null, 'Laufen starten', null,
+    'Ergebnis speichern', 'Ergebnis gespeichert'
+  ];
+  $('raceAction').textContent = currentLeg
+    ? (legs[currentLeg].running ? shortNames[currentLeg] + ' fertig' : shortNames[currentLeg] + ' fortsetzen')
+    : labels[raceStage];
+  $('raceAction').disabled = raceStage === 7;
+  const hints = [
+    'Beginne am Rudergerät. Die Gesamtzeit startet automatisch.',
+    'Rudern läuft. Am Ziel den großen Knopf tippen.',
+    'Wechsel zum Ergometer. Die Gesamtzeit läuft weiter.',
+    'Radfahren läuft. Am Ziel den großen Knopf tippen.',
+    'Wechsel zum Laufband. Die Gesamtzeit läuft weiter.',
+    'Laufen läuft. Im Ziel den großen Knopf tippen.',
+    'Fertig. Ergebnis speichern oder teilen.',
+    'Das Ergebnis steht im Verlauf.'
+  ];
+  $('raceHint').textContent = hints[raceStage];
+  const doneAt = {1:2, 2:3, 3:4, 4:5, 5:6};
+  document.querySelectorAll('.step').forEach(el => {
+    const n = Number(el.dataset.step);
+    el.classList.toggle('is-on', raceStage === n);
+    el.classList.toggle('is-done', raceStage >= doneAt[n]);
+  });
+  document.querySelectorAll('.leg[data-leg]').forEach(card => {
+    const k = card.dataset.leg;
+    if (!legs[k]) return;
+    const active = currentLeg === k && legs[k].running;
+    const done = (k === 'row' && raceStage >= 2) || (k === 'bike' && raceStage >= 4) || (k === 'run' && raceStage >= 6);
+    card.classList.toggle('is-on', active);
+    card.classList.toggle('is-done', done && !active);
+  });
+  document.querySelectorAll('.split').forEach(el => {
+    const k = el.dataset.k;
+    el.classList.toggle('is-on',
+      (k === 'row' && raceStage === 1) ||
+      (k === 't1' && raceStage === 2) ||
+      (k === 'bike' && raceStage === 3) ||
+      (k === 't2' && raceStage === 4) ||
+      (k === 'run' && raceStage === 5)
+    );
+  });
+  document.body.classList.toggle('is-live', current(total) > 0 || raceStage > 0);
+  $('totalClock').classList.toggle('is-live', total.running);
+}
+
+function updateResults(){
+  $('totalClock').textContent = fmt(current(total));
+  for (const k of Object.keys(legs)) $(legs[k].clock).textContent = fmt(current(legs[k]));
+  $('sRow').textContent = fmt(current(legs.row));
+  $('sBike').textContent = fmt(current(legs.bike));
+  $('sRun').textContent = fmt(current(legs.run));
+  $('sT1').textContent = fmt(t1Now());
+  $('sT2').textContent = fmt(t2Now());
+  $('rRow').textContent = fmt(current(legs.row));
+  $('rBike').textContent = fmt(current(legs.bike));
+  $('rRun').textContent = fmt(current(legs.run));
+  $('rT1').textContent = fmt(t1Now());
+  $('rT2').textContent = fmt(t2Now());
+  $('rOther').textContent = fmt(otherNow());
+  $('rTotal').textContent = fmt(current(total));
+  $('rRowMeta').textContent = distLabel('row', $('rowDist').value || goal('row'));
+  $('rBikeMeta').textContent = distLabel('bike', $('bikeDist').value || goal('bike'));
+  $('rRunMeta').textContent = distLabel('run', $('runDist').value || goal('run'));
+  updateRaceChrome();
+}
+
+function stopLeg(k, asTransition=false){
+  const l = legs[k];
+  if (l.running) {
+    l.elapsed += Date.now() - l.start;
+    l.start = null;
+    l.running = false;
+  }
+  if (asTransition && (k === 'row' || k === 'bike')) {
+    splits.pendingFrom = k;
+    splits.pendingAt = current(total);
+    raceStage = {row:2, bike:4}[k];
+  }
+  if (total.running) status('Wechselzeit läuft · nächste Disziplin starten');
+  saveSession();
+  updateResults();
+}
+
+function pauseAll(){
+  if (total.running) {
+    total.elapsed += Date.now() - total.start;
+    total.start = null;
+    total.running = false;
+  }
+  for (const k of Object.keys(legs)) {
+    const l = legs[k];
+    if (l.running) {
+      l.elapsed += Date.now() - l.start;
+      l.start = null;
+      l.running = false;
+    }
+  }
+  status('Pausiert. Mit dem großen Knopf oder Start fortsetzen.');
+  saveSession();
+  updateResults();
+  syncWakeLock();
+}
+
+function clearSession(){
+  total = {elapsed:0, start:null, running:false};
+  for (const l of Object.values(legs)) {
+    l.elapsed = 0;
+    l.start = null;
+    l.running = false;
+  }
+  ['rowDist','bikeDist','runDist'].forEach(id => $(id).value = '');
+  raceStage = 0;
+  splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
+  restored = false;
+  $('restoreBanner').hidden = true;
+  $('restoreBanner').classList.remove('is-on');
+  status('Bereit für dein Training');
+  saveSession();
+  updateResults();
+  syncWakeLock();
+}
+
+async function resetAll(){
+  if (await ask('Zeiten und tatsächliche Strecken zurücksetzen? Gespeicherte Ergebnisse bleiben erhalten.')) clearSession();
+}
+
+function startLeg(k){
+  if (goal(k) == null) {
+    status('Zuerst eine gültige Zielstrecke eingeben.');
+    $(k + 'Goal').focus();
+    return;
+  }
+  if (!total.running) {
+    total.start = Date.now();
+    total.running = true;
+  }
+  if (splits.pendingFrom && splits.pendingFrom !== k && splits.pendingAt != null) {
+    const gap = Math.max(0, current(total) - splits.pendingAt);
+    if (splits.pendingFrom === 'row' && k === 'bike') splits.t1 = gap;
+    if (splits.pendingFrom === 'bike' && k === 'run') splits.t2 = gap;
+    splits.pendingFrom = null;
+    splits.pendingAt = null;
+  }
+  for (const x of Object.keys(legs)) if (x !== k) stopLeg(x);
+  const l = legs[k];
+  if (!l.running) {
+    l.start = Date.now();
+    l.running = true;
+  }
+  raceStage = {row:1, bike:3, run:5}[k];
+  status(names[k] + ' läuft');
+  saveSession();
+  updateResults();
+  syncWakeLock();
+}
+
+function finishLeg(k){
+  if (!legs[k].running && !legs[k].elapsed) {
+    status('Diese Disziplin zuerst starten.');
+    return;
+  }
+  if (goal(k) == null) {
+    status('Zielstrecke prüfen.');
+    return;
+  }
+  $(k + 'Dist').value = goal(k);
+  stopLeg(k);
+  raceStage = {row:2, bike:4, run:6}[k];
+  splits.pendingFrom = k === 'run' ? null : k;
+  splits.pendingAt = k === 'run' ? null : current(total);
+  if (k === 'run' && total.running) {
+    total.elapsed += Date.now() - total.start;
+    total.start = null;
+    total.running = false;
+  }
+  cue();
+  status(k === 'run' ? 'Ziel erreicht. Ergebnis speichern oder teilen.' : 'Ziel erreicht · Wechselzeit läuft');
+  saveSession();
+  updateResults();
+  syncWakeLock();
+}
+
+function advanceRace(){
+  if (raceStage === 0) startLeg('row');
+  else if (raceStage === 2) startLeg('bike');
+  else if (raceStage === 4) startLeg('run');
+  else if ([1,3,5].includes(raceStage)) {
+    const k = {1:'row', 3:'bike', 5:'run'}[raceStage];
+    if (legs[k].running) finishLeg(k);
+    else startLeg(k);
+  } else if (raceStage === 6) saveResult();
+}
+
+function saveSettings(){
+  try {
+    localStorage.setItem(settingKey, JSON.stringify({
+      mode: selectedPreset,
+      values: Object.fromEntries(settingIds.map(id => [id, $(id).value])),
+      sound: soundOn,
+      athlete: $('athlete').value
+    }));
+  } catch (_) {
+    status('Einstellungen können in diesem Browser nicht gespeichert werden.');
+  }
+}
+
+async function selectPreset(key){
+  if (!presets[key]) return;
+  const progress = current(total) > 0 || Object.values(legs).some(l => current(l) > 0) || ['rowDist','bikeDist','runDist'].some(id => $(id).value !== '');
+  if (progress && !await ask('Neue Strecke wählen? Aktuelle Zeiten und Einträge werden zurückgesetzt; gespeicherte Ergebnisse bleiben.')) return;
+  if (progress) clearSession();
+  selectedPreset = key;
+  $('rowGoal').value = presets[key].row;
+  $('bikeGoal').value = presets[key].bike;
+  $('runGoal').value = presets[key].run;
+  saveSettings();
+  updateCalculators();
+}
+
+function readHistory(){
+  try {
+    const a = JSON.parse(localStorage.getItem(historyKey) || '[]');
+    return Array.isArray(a) ? a : [];
+  } catch (_) { return []; }
+}
+
+function snapshot(){
+  return {
+    date: new Date().toLocaleString('de-AT'),
+    athlete: $('athlete').value.trim(),
+    mode: presets[selectedPreset]?.label || 'Individuell',
+    total: current(total),
+    rowTime: current(legs.row),
+    rowDist: $('rowDist').value,
+    rowGoal: goal('row'),
+    bikeTime: current(legs.bike),
+    bikeDist: $('bikeDist').value,
+    bikeGoal: goal('bike'),
+    runTime: current(legs.run),
+    runDist: $('runDist').value,
+    runGoal: goal('run'),
+    t1: t1Now(),
+    t2: t2Now(),
+    other: otherNow(),
+    planned: planned().total
+  };
+}
+
+function formatResult(e){
+  const who = e.athlete ? e.athlete + ' · ' : '';
+  return [
+    'STUDIO TRI · ' + who + (e.mode || 'Training'),
+    e.date || '',
+    '',
+    'Rudern   ' + (e.rowDist || e.rowGoal || '–') + ' m    ' + fmt(e.rowTime),
+    'T1                         ' + fmt(e.t1 || 0),
+    'Rad      ' + (e.bikeDist || e.bikeGoal || '–') + ' km   ' + fmt(e.bikeTime),
+    'T2                         ' + fmt(e.t2 || 0),
+    'Lauf     ' + (e.runDist || e.runGoal || '–') + ' km   ' + fmt(e.runTime),
+    'Gesamt                     ' + fmt(e.total)
+  ].join('\n');
+}
+
+function saveResult(){
+  if (current(total) <= 0) {
+    status('Erst eine Einheit starten.');
+    return;
+  }
+  pauseAll();
+  const entry = snapshot();
+  try {
+    const a = readHistory();
+    a.unshift(entry);
+    localStorage.setItem(historyKey, JSON.stringify(a.slice(0, 30)));
+    raceStage = 7;
+    saveSession();
+    showHistory();
+    cue();
+    status('Ergebnis gespeichert');
+    updateResults();
+  } catch (_) {
+    status('Speichern fehlgeschlagen · Browser-Speicher prüfen');
+  }
+}
+
+async function shareResult(){
+  if (current(total) <= 0 && !readHistory().length) {
+    status('Kein Ergebnis zum Teilen.');
+    return;
+  }
+  const entry = current(total) > 0 ? snapshot() : readHistory()[0];
+  const text = formatResult(entry);
+  try {
+    if (navigator.share) {
+      await navigator.share({title: 'Studio Tri', text});
+      status('Ergebnis geteilt');
+      return;
+    }
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    status('Ergebnis in die Zwischenablage kopiert');
+  } catch (_) {
+    status('Teilen nicht möglich. Text manuell kopieren.');
+  }
+}
+
+function deleteHistory(i){
+  const a = readHistory();
+  a.splice(i, 1);
+  try { localStorage.setItem(historyKey, JSON.stringify(a)); } catch (_) {}
+  showHistory();
+}
+
+function showHistory(){
+  const a = readHistory();
+  const box = $('historyBox');
+  box.replaceChildren();
+  if (!a.length) {
+    box.textContent = 'Noch keine gespeicherten Ergebnisse.';
+    return;
+  }
+  const bestByMode = {};
+  a.forEach(e => {
+    const key = e.mode || 'Training';
+    if (Number.isFinite(e.total) && e.total > 0 && (bestByMode[key] == null || e.total < bestByMode[key])) bestByMode[key] = e.total;
+  });
+  const title = document.createElement('strong');
+  title.textContent = 'Letzte Ergebnisse';
+  box.append(title);
+  a.forEach((e, i) => {
+    const div = document.createElement('div');
+    div.className = 'history-entry';
+    const head = document.createElement('div');
+    head.className = 'meta';
+    const left = document.createElement('strong');
+    left.textContent = (i+1) + '. ' + String(e.date || 'Ohne Datum') + ' · ' + String(e.mode || 'Training') + (e.athlete ? ' · ' + e.athlete : '');
+    head.append(left);
+    if (bestByMode[e.mode || 'Training'] === e.total) {
+      const badge = document.createElement('span');
+      badge.className = 'best';
+      badge.textContent = 'Bestzeit';
+      head.append(badge);
+    }
+    const detail = document.createElement('div');
+    const plan = Number.isFinite(e.planned) ? ' · Plan ' + fmt(e.planned) : '';
+    detail.textContent = 'Gesamt ' + fmt(e.total) +
+      ' · Rudern ' + (e.rowDist || '–') + ' m / ' + fmt(e.rowTime) +
+      ' · T1 ' + fmt(e.t1 || 0) +
+      ' · Rad ' + (e.bikeDist || '–') + ' km / ' + fmt(e.bikeTime) +
+      ' · T2 ' + fmt(e.t2 || 0) +
+      ' · Lauf ' + (e.runDist || '–') + ' km / ' + fmt(e.runTime) + plan;
+    const actions = document.createElement('div');
+    actions.className = 'btnrow';
+    actions.style.marginTop = '8px';
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'ghost smallbtn';
+    del.textContent = 'Löschen';
+    del.addEventListener('click', async () => {
+      if (await ask('Diesen Eintrag löschen?', 'Löschen')) deleteHistory(i);
+    });
+    actions.append(del);
+    div.append(head, detail, actions);
+    box.append(div);
+  });
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+  $('soundBtn').setAttribute('aria-pressed', String(soundOn));
+  saveSettings();
+}
+
+async function toggleFullscreen(){
+  try {
+    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch (_) {
+    status('Vollbild ist auf diesem Gerät nicht verfügbar. Zum Home-Bildschirm legen wirkt app-ähnlicher.');
+  }
+}
+
+document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => selectPreset(b.dataset.preset)));
+document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => startLeg(b.dataset.start)));
+document.querySelectorAll('[data-stop]').forEach(b => b.addEventListener('click', () => stopLeg(b.dataset.stop, true)));
+document.querySelectorAll('[data-finish]').forEach(b => b.addEventListener('click', () => finishLeg(b.dataset.finish)));
+$('raceAction').addEventListener('click', advanceRace);
+$('pauseBtn').addEventListener('click', pauseAll);
+$('resetBtn').addEventListener('click', resetAll);
+$('saveBtn').addEventListener('click', saveResult);
+$('shareBtn').addEventListener('click', shareResult);
+$('historyBtn').addEventListener('click', showHistory);
+$('soundBtn').addEventListener('click', toggleSound);
+$('fullBtn').addEventListener('click', toggleFullscreen);
+$('athlete').addEventListener('input', saveSettings);
+for (const id of settingIds) {
+  $(id).addEventListener('input', () => {
+    if (['rowGoal','bikeGoal','runGoal'].includes(id)) selectedPreset = 'custom';
+    saveSettings();
+    updateCalculators();
+  });
+}
+for (const id of ['rowDist','bikeDist','runDist']) $(id).addEventListener('input', saveSession);
+
+document.addEventListener('keydown', ev => {
+  if (ev.code !== 'Space' && ev.key !== ' ') return;
+  const tag = (ev.target && ev.target.tagName) || '';
+  if (['INPUT','TEXTAREA','SELECT','BUTTON','SUMMARY'].includes(tag)) return;
+  ev.preventDefault();
+  advanceRace();
+});
+
+try {
+  const saved = JSON.parse(localStorage.getItem(settingKey) || 'null');
+  if (saved?.values) {
+    selectedPreset = presets[saved.mode] ? saved.mode : 'custom';
+    for (const id of settingIds) if (saved.values[id] != null) $(id).value = String(saved.values[id]);
+  }
+  if (typeof saved?.sound === 'boolean') {
+    soundOn = saved.sound;
+    $('soundBtn').setAttribute('aria-pressed', String(soundOn));
+  }
+  if (saved?.athlete) $('athlete').value = String(saved.athlete);
+} catch (_) {}
+
+restoreSession();
+document.addEventListener('visibilitychange', () => {
+  saveSession();
+  updateResults();
+  if (document.visibilityState === 'visible') syncWakeLock();
+});
+window.addEventListener('pagehide', saveSession);
+if (!document.documentElement.requestFullscreen) $('fullBtn').hidden = true;
+updateCalculators();
+updateResults();
+syncWakeLock();
+setInterval(updateResults, 250);
+</script>
+</body>
+</html>

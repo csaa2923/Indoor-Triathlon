@@ -1,0 +1,19 @@
+{
+  "name": "Studio Tri – Indoor Triathlon",
+  "short_name": "Studio Tri",
+  "description": "Indoor-Triathlon für Rudergerät, Ergometer und Laufband.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0c10",
+  "theme_color": "#0a0c10",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
