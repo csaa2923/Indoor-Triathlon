@@ -259,6 +259,18 @@ a{color:#8ee4b8}
 .analysis-card small{display:block;color:var(--muted);font-size:var(--fs-xs);margin-top:2px}
 .analysis-note{color:var(--muted);font-size:var(--fs-sm);line-height:1.4;margin:12px 0 0}
 .analysis-note.warn{color:var(--slow)}
+.pulse-panel{border:1px solid #774255;border-radius:14px;background:#24151f;padding:12px;margin:0 0 14px}
+.pulse-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pulse-head strong{color:#ff9bb1;font-size:var(--fs-sm)}
+.pulse-reading{font-family:var(--mono);font-size:clamp(28px,7vw,48px);font-weight:800;font-variant-numeric:tabular-nums}
+.pulse-reading small{font-size:var(--fs-xs);font-family:inherit;color:var(--muted)}
+.pulse-info{color:var(--muted);font-size:var(--fs-xs);line-height:1.4;margin:4px 0 8px}
+.pulse-stats{display:flex;gap:20px;font-size:var(--fs-sm)}
+.pulse-stats b{color:#fff}
+.pulse-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.pulse-actions button{font-size:var(--fs-xs);padding:7px 10px}
+.pulse-report{margin-top:14px}
+.pulse-report h3{margin:0 0 8px;font-size:var(--fs-sm);color:#ff9bb1}
 [hidden]{display:none!important}
 .row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:var(--fs-md)}
 .row:last-child{border:0}
@@ -436,6 +448,12 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
       </div>
       <p class="live-guide" id="liveGuide">Nach Eingabe einer aktuellen Distanz erscheinen Ø Tempo und Planabweichung.</p>
     </div>
+    <div class="pulse-panel" id="watchHeartPanel" hidden>
+      <div class="pulse-head"><strong>♥ Apple Watch · Puls</strong><div class="pulse-reading"><span id="heartCurrent">–</span> <small>bpm</small></div></div>
+      <p class="pulse-info" id="heartState">Watch-App öffnen und dort Training starten.</p>
+      <div class="pulse-stats"><span>Ø aktuell <b id="heartAvg">–</b></span><span>Max. <b id="heartMax">–</b></span></div>
+      <div class="pulse-actions"><button type="button" class="secondary" id="watchStart">Watch starten</button><button type="button" class="secondary" id="watchStop">Watch stoppen</button></div>
+    </div>
     <button type="button" class="cta" id="raceAction">Rudern starten</button>
     <div class="btnrow" style="margin-top:10px">
       <button type="button" class="secondary" id="pauseBtn">Pause</button>
@@ -612,6 +630,16 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <div class="analysis-card"><span>Lauf · Ø Tempo</span><strong id="avgRun">–</strong><small id="avgRunMeta">km/h und min/km</small></div>
         <div class="analysis-card"><span>Wechsel T1 + T2</span><strong id="avgChange">–</strong><small id="avgChangeMeta">ohne Vorbereitung</small></div>
       </div>
+      <div class="pulse-report" id="heartAnalysis" hidden>
+        <h3>♥ Puls · Apple Watch</h3>
+        <div class="analysis-grid">
+          <div class="analysis-card"><span>Sport gesamt</span><strong id="heartTotal">–</strong><small id="heartTotalMeta">Ø / max bpm</small></div>
+          <div class="analysis-card"><span>Rudern</span><strong id="heartRow">–</strong><small id="heartRowMeta">Ø / max bpm</small></div>
+          <div class="analysis-card"><span>Rad</span><strong id="heartBike">–</strong><small id="heartBikeMeta">Ø / max bpm</small></div>
+          <div class="analysis-card"><span>Lauf</span><strong id="heartRun">–</strong><small id="heartRunMeta">Ø / max bpm</small></div>
+        </div>
+        <p class="analysis-note">Ø aus empfangenen Messpunkten während aktiver Disziplinen. Wechsel und Pausen zählen nicht mit; bei Funklücken fehlen Messpunkte.</p>
+      </div>
       <p class="analysis-note" id="analysisNote" hidden></p>
       <div class="btnrow" style="margin-top:14px">
         <button type="button" class="cta" id="saveBtn" style="width:auto;min-height:46px;padding:12px 18px">Ergebnis speichern</button>
@@ -634,7 +662,7 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
   </section>
 
   <footer>
-    Alle Daten bleiben in diesem Browser. Keine Geräteverbindung, kein Konto, keine Werbung.<br>
+    Alle Daten bleiben auf diesem Gerät. In der nativen iPhone-App kann eine gekoppelte Apple Watch Puls senden; die Browser-Version hat keinen Watch-Zugriff. Kein Konto, keine Werbung.<br>
     Display-an, Teilen und Home-Bildschirm: <code>start.bat</code> — nicht die Datei direkt öffnen.<br>
     Quellen:
     <a href="https://www.triathlonquebec.org/wp-content/uploads/2026/03/World-Triathlon_Competition-Rules_2026.pdf" target="_blank" rel="noopener noreferrer">World Triathlon, Regeln 2026 (Anhang A)</a>
@@ -714,6 +742,9 @@ let splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
 let cockpitOpen = false;
 let displayedLiveLeg = null;
 let liveReadings = {row:null, bike:null, run:null};
+let heartSamples = [];
+let lastHeart = null;
+let watchState = '';
 let soundOn = true;
 let wakeLock = null;
 let restored = false;
@@ -739,6 +770,62 @@ function de(n, places=1){
 }
 function current(obj){
   return obj.elapsed + (obj.running ? Math.max(0, Date.now() - obj.start) : 0);
+}
+function heartSummary(){
+  const result = {};
+  for (const k of ['total','row','bike','run']) {
+    const readings = k === 'total' ? heartSamples : heartSamples.filter(s => s.leg === k);
+    if (!readings.length) { result[k] = null; continue; }
+    result[k] = {avg:Math.round(readings.reduce((sum,s) => sum + s.bpm, 0)/readings.length),
+      max:Math.max(...readings.map(s => s.bpm)), count:readings.length};
+  }
+  return result;
+}
+function renderHeartLive(){
+  const panel = $('watchHeartPanel');
+  if (!panel || panel.hidden) return;
+  const fresh = lastHeart && Date.now() - lastHeart.at < 20000;
+  $('heartCurrent').textContent = fresh ? String(lastHeart.bpm) : '–';
+  const k = {1:'row',3:'bike',5:'run'}[raceStage];
+  const stats = k ? heartSummary()[k] : null;
+  $('heartAvg').textContent = stats ? stats.avg + ' bpm' : '–';
+  $('heartMax').textContent = stats ? stats.max + ' bpm' : '–';
+  $('heartState').textContent = fresh ? 'Live von der Apple Watch · ' + (k ? shortNames[k] : 'Wechsel oder Pause') :
+    watchState || 'Keine aktuellen Messwerte. Watch-App öffnen und Training starten.';
+}
+function renderHeartAnalysis(){
+  const summary = heartSummary();
+  $('heartAnalysis').hidden = !summary.total;
+  for (const [k,id] of [['total','heartTotal'],['row','heartRow'],['bike','heartBike'],['run','heartRun']]) {
+    const s = summary[k];
+    $(id).textContent = s ? s.avg + ' / ' + s.max + ' bpm' : '–';
+    $(id+'Meta').textContent = s ? 'Ø / max · ' + s.count + ' Messpunkte' : 'Keine Messpunkte';
+  }
+}
+window.addEventListener('studioTriNativeReady', () => { $('watchHeartPanel').hidden = false; renderHeartLive(); });
+window.addEventListener('studioTriWatchState', event => {
+  watchState = String(event.detail?.message || '').slice(0, 120);
+  $('watchHeartPanel').hidden = false;
+  renderHeartLive();
+});
+window.addEventListener('studioTriHeartRate', event => {
+  const bpm = Number(event.detail?.bpm), at = Number(event.detail?.timestamp);
+  if (!Number.isInteger(bpm) || bpm < 35 || bpm > 230 || !Number.isFinite(at) ||
+      at > Date.now() + 2000 || Date.now() - at > 20000 || (lastHeart && at <= lastHeart.at)) return;
+  lastHeart = {bpm,at};
+  $('watchHeartPanel').hidden = false;
+  const k = {1:'row',3:'bike',5:'run'}[raceStage];
+  if (k && legs[k].running && total.running) {
+    heartSamples.push({bpm,at,leg:k});
+    if (heartSamples.length > 4000) heartSamples.shift();
+    saveSession();
+  }
+  updateResults();
+});
+function commandWatch(action){
+  const bridge = window.webkit?.messageHandlers?.studioTri;
+  if (!bridge) return;
+  bridge.postMessage({action});
 }
 function status(text){ $('phaseStatus').textContent = text; }
 function liveTransition(){
@@ -811,7 +898,8 @@ function saveSession(){
       actual: Object.fromEntries(['rowDist','bikeDist','runDist'].map(id => [id, $(id).value])),
       raceStage,
       splits,
-      liveReadings
+      liveReadings,
+      heartSamples
     }));
   } catch (_) {
     status('Hinweis: Dieser Browser kann den laufenden Stand nicht speichern.');
@@ -844,6 +932,9 @@ function restoreSession(){
       if (saved.actual?.[id] != null) $(id).value = String(saved.actual[id]);
     }
     raceStage = Number.isInteger(saved.raceStage) && saved.raceStage >= 0 && saved.raceStage <= 7 ? saved.raceStage : 0;
+    if (Array.isArray(saved.heartSamples)) heartSamples = saved.heartSamples.slice(-4000).filter(s =>
+      ['row','bike','run'].includes(s.leg) && Number.isFinite(s.bpm) && s.bpm >= 35 && s.bpm <= 230 &&
+      Number.isFinite(s.at) && s.at > 0 && s.at <= Date.now());
     cockpitOpen = raceStage >= 1 && raceStage <= 5;
     for (const k of ['row','bike','run']) {
       const reading = saved.liveReadings?.[k];
@@ -1138,6 +1229,7 @@ function fillRaceMeta(){
   }
   $('avgChange').textContent = fmt(t1Now()+t2Now());
   $('avgChangeMeta').textContent = 'T1 ' + fmt(t1Now()) + ' · T2 ' + fmt(t2Now());
+  renderHeartAnalysis();
   const dlt = quality.complete ? deltaText(sportTime(entry), plan.total) : {text:''};
   const note = $('analysisNote');
   note.textContent = quality.implausible ? 'Unplausible Geschwindigkeit: tatsächliche Distanz und Zeit am Gerät prüfen. Kein Planvergleich und keine Bestzeit.' :
@@ -1171,6 +1263,7 @@ function updateResults(){
   $('rTotal').textContent = fmt(current(total));
   $('rTotalCopy').textContent = fmt(current(total));
   fillRaceMeta();
+  renderHeartLive();
   updateRaceChrome();
 }
 
@@ -1231,6 +1324,8 @@ function clearSession(){
   raceStage = 0;
   splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
   liveReadings = {row:null, bike:null, run:null};
+  heartSamples = [];
+  lastHeart = null;
   displayedLiveLeg = null;
   $('liveDistance').value = '';
   restored = false;
@@ -1271,6 +1366,7 @@ function startLeg(k){
     l.running = true;
   }
   raceStage = {row:1, bike:3, run:5}[k];
+  if (k === 'row' && current(legs.row) < 2000) commandWatch('start');
   status(names[k] + ' läuft');
   saveSession();
   updateResults();
@@ -1302,7 +1398,7 @@ function finishLeg(k){
   saveSession();
   updateResults();
   syncWakeLock();
-  if (k === 'run') revealBoard();
+  if (k === 'run') { commandWatch('stop'); revealBoard(); }
   else revealCockpit();
 }
 
@@ -1375,7 +1471,8 @@ function snapshot(){
     planned: p.total,
     plannedRow: p.row,
     plannedBike: p.bike,
-    plannedRun: p.run
+    plannedRun: p.run,
+    heartRate: heartSummary()
   };
 }
 
@@ -1397,6 +1494,8 @@ function formatResult(e){
     'Lauf     ' + (e.runDist || '–') + ' km   ' + fmt(e.runTime) + (averages[2] ? '   Ø ' + de(averages[2].speed,1) + ' km/h · ' + paceValue(averages[2].pace) + ' min/km' : ''),
     'Sportzeit                  ' + fmt(sportTime(e)) + (totalDelta.text ? '   ' + totalDelta.text : ''),
     'Gesamt (inkl. Wechsel)     ' + fmt(e.total),
+    e.heartRate?.total?.count ? 'Puls Sport · Ø ' + e.heartRate.total.avg + ' / max ' + e.heartRate.total.max + ' bpm' : '',
+    ...['row','bike','run'].map(k => e.heartRate?.[k]?.count ? shortNames[k] + ' · Puls Ø ' + e.heartRate[k].avg + ' / max ' + e.heartRate[k].max + ' bpm' : ''),
     q.implausible ? 'Hinweis: Distanz und Zeit am Gerät prüfen.' : '',
     planLine
   ].filter(x => x !== '').join('\n');
@@ -1525,6 +1624,7 @@ function showHistory(){
       ' · Rad ' + (e.bikeDist || '–') + ' km / ' + fmt(e.bikeTime) + bikeAvg +
       ' · T2 ' + fmt(e.t2 || 0) +
       ' · Lauf ' + (e.runDist || '–') + ' km / ' + fmt(e.runTime) + runAvg +
+      (e.heartRate?.total?.count ? ' · Puls Ø ' + e.heartRate.total.avg + ' / max ' + e.heartRate.total.max + ' bpm' : '') +
       (q.implausible ? ' · Distanz/Zeit prüfen' : '');
     const actions = document.createElement('div');
     actions.className = 'btnrow';
@@ -1661,6 +1761,8 @@ $('historyBtn').addEventListener('click', () => {
 $('soundBtn').addEventListener('click', toggleSound);
 $('fullBtn').addEventListener('click', toggleFullscreen);
 $('installBtn').addEventListener('click', installApp);
+$('watchStart').addEventListener('click', () => commandWatch('start'));
+$('watchStop').addEventListener('click', () => commandWatch('stop'));
 $('athlete').addEventListener('input', () => {
   saveSettings();
   fillRaceMeta();
