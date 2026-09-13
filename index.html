@@ -1053,9 +1053,11 @@ function updateResults(){
   updateRaceChrome();
 }
 
+function revealCockpit(){
+  document.querySelector('.hud').scrollIntoView({behavior: reduceMotion() ? 'auto' : 'smooth', block:'start'});
+}
 function revealBoard(){
-  const el = $('raceBoard');
-  el.scrollIntoView({behavior: reduceMotion() ? 'auto' : 'smooth', block:'start'});
+  $('raceBoard').scrollIntoView({behavior: reduceMotion() ? 'auto' : 'smooth', block:'start'});
 }
 
 function stopLeg(k, asTransition=false){
@@ -1073,6 +1075,7 @@ function stopLeg(k, asTransition=false){
   if (total.running) status('Wechselzeit läuft · nächste Disziplin starten');
   saveSession();
   updateResults();
+  if (asTransition) revealCockpit();
 }
 
 function pauseAll(){
@@ -1093,6 +1096,7 @@ function pauseAll(){
   saveSession();
   updateResults();
   syncWakeLock();
+  revealCockpit();
 }
 
 function clearSession(){
@@ -1112,6 +1116,7 @@ function clearSession(){
   saveSession();
   updateResults();
   syncWakeLock();
+  revealCockpit();
 }
 
 async function resetAll(){
@@ -1146,6 +1151,7 @@ function startLeg(k){
   saveSession();
   updateResults();
   syncWakeLock();
+  revealCockpit();
 }
 
 function finishLeg(k){
@@ -1173,6 +1179,7 @@ function finishLeg(k){
   updateResults();
   syncWakeLock();
   if (k === 'run') revealBoard();
+  else revealCockpit();
 }
 
 function advanceRace(){
@@ -1210,6 +1217,8 @@ async function selectPreset(key){
   $('runGoal').value = presets[key].run;
   saveSettings();
   updateCalculators();
+  updateResults();
+  revealCockpit();
 }
 
 function readHistory(){
@@ -1564,6 +1573,10 @@ updateCalculators();
 updateResults();
 showHistory();
 syncWakeLock();
+if (restored) requestAnimationFrame(() => {
+  (raceStage >= 6 ? $('raceBoard') : document.querySelector('.hud'))
+    .scrollIntoView({behavior:'auto', block:'start'});
+});
 setInterval(updateResults, 250);
 </script>
 </body>
