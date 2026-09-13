@@ -271,6 +271,13 @@ a{color:#8ee4b8}
 .pulse-actions button{font-size:var(--fs-xs);padding:7px 10px}
 .pulse-report{margin-top:14px}
 .pulse-report h3{margin:0 0 8px;font-size:var(--fs-sm);color:#ff9bb1}
+.sport-visual{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.sport-visual[hidden]{display:none!important}.sport-visual svg{width:74px;height:58px;flex:none;overflow:visible}
+.sport-visual .visual-copy{min-width:0}.sport-visual strong{display:block;font-size:var(--fs-md)}.sport-visual small{display:block;color:var(--muted);font-size:var(--fs-xs);margin-top:2px}
+.visual-drawing{transform-origin:50% 75%;animation:visual-bob 1.1s ease-in-out infinite}.visual-motion{transform-origin:50% 50%;animation:visual-move .75s ease-in-out infinite alternate}
+.visual-wheel{transform-origin:center;animation:visual-spin .8s linear infinite}.visual-pulse{animation:visual-pulse 1.1s ease-in-out infinite}
+@keyframes visual-bob{50%{transform:translateY(-3px)}}@keyframes visual-move{to{transform:rotate(9deg)}}@keyframes visual-spin{to{transform:rotate(360deg)}}@keyframes visual-pulse{50%{opacity:.55;transform:scale(1.08)}}
+.visual-toggle{margin-left:auto;white-space:nowrap;font-size:var(--fs-xs)!important;padding:7px 9px!important}
 [hidden]{display:none!important}
 .row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:var(--fs-md)}
 .row:last-child{border:0}
@@ -435,6 +442,11 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="15.2" cy="5.6" r="2"/><path d="M13.8 9.2l-3 3.2-3.2 5.2M13.8 9.2l3.2 4.6 3.4-1.4M10.8 12.4l4.6-.6-2.8 7"/></svg>
         <span>Lauf</span><strong id="sRun">00:00:00</strong>
       </div>
+    </div>
+    <div class="sport-visual" id="sportVisual" hidden aria-live="polite">
+      <svg id="sportVisualSvg" viewBox="0 0 90 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg>
+      <div class="visual-copy"><strong id="sportVisualTitle">Rudern</strong><small id="sportVisualText">Animation der aktiven Disziplin</small></div>
+      <button type="button" class="secondary visual-toggle" id="visualToggle" aria-pressed="true">Animation an</button>
     </div>
     <div class="live-metrics" id="liveMetrics">
       <div class="live-input" id="liveInputBox" hidden>
@@ -745,6 +757,7 @@ let liveReadings = {row:null, bike:null, run:null};
 let heartSamples = [];
 let lastHeart = null;
 let watchState = '';
+let visualOn = true;
 let soundOn = true;
 let wakeLock = null;
 let restored = false;
@@ -801,6 +814,23 @@ function renderHeartAnalysis(){
     $(id).textContent = s ? s.avg + ' / ' + s.max + ' bpm' : '–';
     $(id+'Meta').textContent = s ? 'Ø / max · ' + s.count + ' Messpunkte' : 'Keine Messpunkte';
   }
+}
+function renderSportVisual(){
+  const panel = $('sportVisual');
+  if (!panel) return;
+  const k = {1:'row',3:'bike',5:'run'}[raceStage];
+  panel.hidden = !visualOn || !k;
+  $('visualToggle').textContent = visualOn ? 'Animation an' : 'Animation aus';
+  $('visualToggle').setAttribute('aria-pressed', String(visualOn));
+  if (!k) return;
+  const drawings = {
+    row:'<g class="visual-drawing" style="color:var(--row)"><path d="M16 48h51"/><path d="M30 44c-5-9-6-19-4-28"/><circle cx="25" cy="13" r="5"/><path d="M27 19l14 10 12-2"/><path d="M41 29l-8 13M53 27l9 14"/><path class="visual-motion" d="M61 12L78 5M61 12l17 10"/></g><circle class="visual-pulse" cx="72" cy="31" r="10" stroke="var(--row)" opacity=".35"/>',
+    bike:'<g class="visual-drawing" style="color:var(--bike)"><circle class="visual-wheel" cx="22" cy="45" r="12"/><circle class="visual-wheel" cx="68" cy="45" r="12"/><path d="M22 45l18-22 14 22M40 23l-4-8M40 23h14M54 45l-8-18"/><circle cx="43" cy="11" r="5"/><path d="M43 16l-8 10 11 8M35 26l-11 5M46 34l9-12"/></g><path class="visual-motion" d="M72 12l11 5" stroke="var(--bike)"/>',
+    run:'<g class="visual-drawing" style="color:var(--run)"><circle cx="47" cy="10" r="5"/><path d="M46 16l-5 15 12 8M41 31L28 41M52 39l12 10M42 21l13 6 10-5"/><path d="M28 41l-11 4M64 49l10 1"/></g><path class="visual-motion" d="M12 17h12M7 27h12" stroke="var(--run)" opacity=".7"/>'
+  };
+  $('sportVisualSvg').innerHTML = drawings[k];
+  $('sportVisualTitle').textContent = shortNames[k];
+  $('sportVisualText').textContent = legs[k].running ? 'Aktive Disziplin · Animation folgt dem Tempo' : 'Disziplin auswählen und starten';
 }
 window.addEventListener('studioTriNativeReady', () => { $('watchHeartPanel').hidden = false; renderHeartLive(); });
 window.addEventListener('studioTriWatchState', event => {
@@ -1265,6 +1295,7 @@ function updateResults(){
   fillRaceMeta();
   renderHeartLive();
   updateRaceChrome();
+  renderSportVisual();
 }
 
 function revealCockpit(){
@@ -1419,6 +1450,7 @@ function saveSettings(){
       mode: selectedPreset,
       values: Object.fromEntries(settingIds.map(id => [id, $(id).value])),
       sound: soundOn,
+      visualOn,
       athlete: $('athlete').value
     }));
   } catch (_) {
@@ -1763,6 +1795,7 @@ $('fullBtn').addEventListener('click', toggleFullscreen);
 $('installBtn').addEventListener('click', installApp);
 $('watchStart').addEventListener('click', () => commandWatch('start'));
 $('watchStop').addEventListener('click', () => commandWatch('stop'));
+$('visualToggle').addEventListener('click', () => { visualOn = !visualOn; saveSettings(); renderSportVisual(); });
 $('athlete').addEventListener('input', () => {
   saveSettings();
   fillRaceMeta();
@@ -1796,6 +1829,7 @@ try {
     $('soundBtn').setAttribute('aria-label', soundOn ? 'Ton und Vibration an' : 'Ton und Vibration aus');
     $('soundLabel').textContent = soundOn ? 'Ton an' : 'Ton aus';
   }
+  if (typeof saved?.visualOn === 'boolean') visualOn = saved.visualOn;
   if (saved?.athlete) $('athlete').value = String(saved.athlete);
 } catch (_) {}
 
