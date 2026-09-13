@@ -96,6 +96,30 @@ body::before{
   order:3;background:var(--surface);border:1px solid var(--line);border-radius:24px;
   padding:22px 18px 18px;text-align:center
 }
+.hud-top{display:none;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+.hud-top strong{font-size:14px;color:var(--accent)}
+.hud-top button{font-size:12px;padding:8px 10px}
+.live-metrics{display:none;text-align:left;margin:4px 0 14px}
+.live-input label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-bottom:5px}
+.live-input input{width:100%;min-height:46px}
+.live-input small{display:block;color:var(--muted);font-size:11px;margin-top:5px}
+.live-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}
+.live-kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0}
+.live-kpi span,.live-kpi small{display:block;color:var(--muted);font-size:11px;line-height:1.3}
+.live-kpi strong{display:block;font-size:clamp(18px,5vw,26px);font-variant-numeric:tabular-nums;margin:4px 0}
+.live-kpi strong.is-fast{color:var(--ok)}
+.live-kpi strong.is-slow{color:var(--slow)}
+.live-guide{color:var(--muted);font-size:12px;line-height:1.4;margin:9px 2px 0}
+body.cockpit-mode{overflow:hidden}
+body.cockpit-mode .hud{
+  position:fixed;inset:0;z-index:40;order:initial;width:100%;height:100dvh;
+  border:0;border-radius:0;overflow-y:auto;overscroll-behavior:contain;
+  padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+  display:flex;flex-direction:column;justify-content:space-evenly;
+}
+body.cockpit-mode .hud-top{display:flex}
+body.cockpit-mode .live-metrics{display:block}
+@media(max-height:690px){body.cockpit-mode .hud{justify-content:flex-start;gap:8px}}
 .kicker{font-size:var(--fs-xs);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .phase{margin:8px 0 0;font-size:var(--fs-2xl);font-weight:800;letter-spacing:-.03em}
 .clock{
@@ -380,6 +404,7 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
   </section>
 
   <section class="hud" aria-labelledby="hudPhase">
+    <div class="hud-top"><strong id="hudRoute">STUDIO TRI</strong><button type="button" class="ghost" id="editRoute">Strecke ändern</button></div>
     <div class="kicker" id="hudKicker">Gesamtzeit</div>
     <div class="phase" id="hudPhase">Bereit</div>
     <div class="clock" id="totalClock">00:00:00</div>
@@ -398,6 +423,18 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="15.2" cy="5.6" r="2"/><path d="M13.8 9.2l-3 3.2-3.2 5.2M13.8 9.2l3.2 4.6 3.4-1.4M10.8 12.4l4.6-.6-2.8 7"/></svg>
         <span>Lauf</span><strong id="sRun">00:00:00</strong>
       </div>
+    </div>
+    <div class="live-metrics" id="liveMetrics">
+      <div class="live-input" id="liveInputBox" hidden>
+        <label for="liveDistance" id="liveDistLabel">Zwischenstand am Gerät</label>
+        <input id="liveDistance" type="number" inputmode="decimal" min="0" step="any" placeholder="Distanz ablesen und eingeben">
+        <small id="liveDistHint">Für eine Live-Auswertung den aktuellen Stand vom Gerät eintragen.</small>
+      </div>
+      <div class="live-kpis">
+        <div class="live-kpi"><span id="liveAvgLabel">Ø am Zwischenstand</span><strong id="liveAvg">–</strong><small id="liveAvgDetail">Distanz am Gerät ablesen</small></div>
+        <div class="live-kpi"><span>Sportzeit zum Plan</span><strong id="livePlan">–</strong><small id="livePlanDetail">Ohne Wechsel · gleiche Strecke</small></div>
+      </div>
+      <p class="live-guide" id="liveGuide">Nach Eingabe einer aktuellen Distanz erscheinen Ø Tempo und Planabweichung.</p>
     </div>
     <button type="button" class="cta" id="raceAction">Rudern starten</button>
     <div class="btnrow" style="margin-top:10px">
@@ -674,6 +711,9 @@ const $ = id => document.getElementById(id);
 let selectedPreset = 'studio';
 let raceStage = 0;
 let splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
+let cockpitOpen = false;
+let displayedLiveLeg = null;
+let liveReadings = {row:null, bike:null, run:null};
 let soundOn = true;
 let wakeLock = null;
 let restored = false;
@@ -770,7 +810,8 @@ function saveSession(){
       legs: Object.fromEntries(Object.entries(legs).map(([k,l]) => [k, {elapsed:l.elapsed, start:l.start, running:l.running}])),
       actual: Object.fromEntries(['rowDist','bikeDist','runDist'].map(id => [id, $(id).value])),
       raceStage,
-      splits
+      splits,
+      liveReadings
     }));
   } catch (_) {
     status('Hinweis: Dieser Browser kann den laufenden Stand nicht speichern.');
@@ -803,6 +844,14 @@ function restoreSession(){
       if (saved.actual?.[id] != null) $(id).value = String(saved.actual[id]);
     }
     raceStage = Number.isInteger(saved.raceStage) && saved.raceStage >= 0 && saved.raceStage <= 7 ? saved.raceStage : 0;
+    cockpitOpen = raceStage >= 1 && raceStage <= 5;
+    for (const k of ['row','bike','run']) {
+      const reading = saved.liveReadings?.[k];
+      if (reading && Number.isFinite(reading.distance) && reading.distance > 0 &&
+          Number.isFinite(reading.elapsed) && reading.elapsed > 0 && reading.elapsed <= current(legs[k])) {
+        liveReadings[k] = {distance:reading.distance, elapsed:reading.elapsed};
+      }
+    }
     if (saved.splits && Number.isFinite(saved.splits.t1) && Number.isFinite(saved.splits.t2)) {
       splits = {
         t1: Math.max(0, saved.splits.t1),
@@ -982,7 +1031,79 @@ function updateRaceChrome(){
     );
   });
   document.body.classList.toggle('is-live', current(total) > 0 || raceStage > 0);
+  document.body.classList.toggle('cockpit-mode', cockpitOpen && raceStage <= 5);
+  $('editRoute').hidden = raceStage !== 0;
+  $('hudRoute').textContent = 'STUDIO TRI · ' + (presets[selectedPreset]?.label || 'Individuell');
   $('totalClock').classList.toggle('is-live', total.running);
+  updateLiveMetrics();
+}
+
+function liveMetricText(k, metric){
+  if (k === 'row') return paceValue(metric.pace) + ' /500 m';
+  return de(metric.speed,1) + ' km/h';
+}
+function updateLiveMetrics(){
+  const k = {1:'row',3:'bike',5:'run'}[raceStage] || null;
+  const plan = planned();
+  if (displayedLiveLeg !== k) {
+    displayedLiveLeg = k;
+    $('liveDistance').value = k && liveReadings[k] ? String(liveReadings[k].distance) : '';
+  }
+  $('liveInputBox').hidden = !k;
+  if (k) {
+    $('liveDistLabel').textContent = 'Aktuelle Distanz am ' + ({row:'Rudergerät (m)',bike:'Ergometer (km)',run:'Laufband (km)'})[k];
+    $('liveDistHint').textContent = 'Ziel: ' + distLabel(k, goal(k)) + ' · nur abgelesene Zwischenstände eintragen';
+  }
+  const last = raceStage >= 4 ? 'bike' : raceStage >= 2 ? 'row' : null;
+  const shown = k || last;
+  const reading = k ? liveReadings[k] : null;
+  const dist = k ? reading?.distance : last ? measuredDistance(last, $(last+'Dist').value) : null;
+  const elapsed = k ? reading?.elapsed : last ? current(legs[last]) : null;
+  const metric = shown && dist != null && elapsed > 0 ? average(shown,dist,elapsed) : null;
+  const plausible = metric && metric.speed <= {row:30,bike:120,run:32}[shown] &&
+    dist <= goal(shown)*1.01;
+  $('liveAvgLabel').textContent = k ? 'Ø ' + names[k] + ' · Zwischenstand' : last ? 'Ø ' + names[last] + ' · letzte Disziplin' : 'Ø Tempo';
+  $('liveAvg').textContent = plausible ? liveMetricText(shown,metric) : '–';
+  $('liveAvgDetail').textContent = plausible ?
+    (shown === 'row' ? 'Ø ' + de(metric.speed,1) + ' km/h' : shown === 'run' ? 'Pace ' + paceValue(metric.pace) + ' min/km' : 'Stand bei ' + distLabel(shown,dist)) :
+    metric ? 'Distanz und Zeit am Gerät prüfen' : 'Zwischenstand am Gerät eintragen';
+
+  let actual = 0, expected = 0, comparable = true, counted = 0;
+  for (const leg of ['row','bike','run']) {
+    const finished = (leg === 'row' && raceStage >= 2) || (leg === 'bike' && raceStage >= 4) || (leg === 'run' && raceStage >= 6);
+    if (!finished) continue;
+    const quality = legQuality(leg, measuredDistance(leg,$(leg+'Dist').value), current(legs[leg]), goal(leg));
+    if (!quality.complete || !Number.isFinite(plan[leg])) { comparable = false; break; }
+    actual += current(legs[leg]);
+    expected += plan[leg];
+    counted++;
+  }
+  if (k && reading) {
+    if (!plausible || !Number.isFinite(plan[k]) || !Number.isFinite(goal(k))) comparable = false;
+    else {
+      actual += reading.elapsed;
+      expected += plan[k] * Math.min(1,reading.distance/goal(k));
+      counted++;
+    }
+  }
+  const delta = comparable && counted ? deltaText(actual,expected) : {text:'',fast:false};
+  $('livePlan').textContent = delta.text ? delta.text.replace(' unter Plan',' vor Plan').replace(' über Plan',' hinter Plan') : '–';
+  $('livePlan').classList.toggle('is-fast',Boolean(delta.text) && delta.fast);
+  $('livePlan').classList.toggle('is-slow',Boolean(delta.text) && !delta.fast);
+  $('livePlanDetail').textContent = delta.text ?
+    'Sportzeit ' + fmt(actual) + ' · Plan ' + fmt(expected) + ' · ohne Wechsel' :
+    !comparable ? 'Strecke oder Zeit prüfen' :
+    plan.total ? 'Plan Ziel ' + fmt(plan.total) + ' · ohne Wechsel' : 'Zwischenstand für Vergleich nötig';
+  $('liveGuide').textContent = k && metric && !plausible ?
+    'Distanz oder Zeit unplausibel: Wert am Gerät prüfen. Der Planvergleich bleibt ausgeblendet.' :
+    k && plausible ?
+    'Stand ' + distLabel(k,dist) + ' nach ' + fmt(elapsed) + ' · Hochrechnung Ziel ' +
+      fmt(elapsed*goal(k)/dist) + (plan[k] ? ' · Plan Ziel ' + fmt(plan[k]) : '') +
+      '. Aktualisieren, wenn das Gerät eine neue Distanz anzeigt.' :
+    k ? 'Für Ø Tempo und Planstand die aktuelle Distanz vom Gerät eintragen. Ziel-Plan: ' +
+      (plan[k] ? fmt(plan[k]) : '–') + '. Ohne Gerätekopplung erfolgt keine automatische Distanzmessung.' :
+    raceStage === 0 ? 'Distanz gewählt. Am Gerät starten und zwischendurch die angezeigte Distanz eintragen.' :
+    'Wechsel läuft. T1/T2 zählen zur Gesamtzeit, nicht zur geplanten Sportzeit.';
 }
 
 function fillRaceMeta(){
@@ -1109,6 +1230,9 @@ function clearSession(){
   ['rowDist','bikeDist','runDist'].forEach(id => $(id).value = '');
   raceStage = 0;
   splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
+  liveReadings = {row:null, bike:null, run:null};
+  displayedLiveLeg = null;
+  $('liveDistance').value = '';
   restored = false;
   $('restoreBanner').hidden = true;
   $('restoreBanner').classList.remove('is-on');
@@ -1217,6 +1341,7 @@ async function selectPreset(key){
   $('runGoal').value = presets[key].run;
   saveSettings();
   updateCalculators();
+  cockpitOpen = true;
   updateResults();
   revealCockpit();
 }
@@ -1512,6 +1637,19 @@ document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click
 document.querySelectorAll('[data-stop]').forEach(b => b.addEventListener('click', () => stopLeg(b.dataset.stop, true)));
 document.querySelectorAll('[data-finish]').forEach(b => b.addEventListener('click', () => finishLeg(b.dataset.finish)));
 $('raceAction').addEventListener('click', advanceRace);
+$('editRoute').addEventListener('click', () => {
+  cockpitOpen = false;
+  updateResults();
+  $('planBox').scrollIntoView({behavior:reduceMotion() ? 'auto' : 'smooth',block:'start'});
+});
+$('liveDistance').addEventListener('input', () => {
+  const k = {1:'row',3:'bike',5:'run'}[raceStage];
+  if (!k) return;
+  const distance = measuredDistance(k,$('liveDistance').value);
+  liveReadings[k] = distance == null ? null : {distance,elapsed:current(legs[k])};
+  saveSession();
+  updateLiveMetrics();
+});
 $('pauseBtn').addEventListener('click', pauseAll);
 $('resetBtn').addEventListener('click', resetAll);
 $('saveBtn').addEventListener('click', saveResult);
