@@ -1,0 +1,47 @@
+name: StudioTri
+options:
+  bundleIdPrefix: at.studiotri
+  deploymentTarget:
+    iOS: '17.0'
+    watchOS: '10.0'
+settings:
+  SWIFT_VERSION: '5.9'
+targets:
+  StudioTri:
+    type: application
+    platform: iOS
+    sources: [iOS]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: at.studiotri.iphone
+      TARGETED_DEVICE_FAMILY: '1'
+    info:
+      path: iOS/Info.plist
+      properties:
+        CFBundleDisplayName: Studio Tri
+        UILaunchScreen: {}
+        NSHealthShareUsageDescription: Herzfrequenzdaten aus dem Studio-Tri-Training anzeigen.
+        NSHealthUpdateUsageDescription: Das Watch-Training für die Pulsmessung speichern.
+    dependencies:
+      - target: StudioTriWatch
+        embed: true
+        link: false
+  StudioTriWatch:
+    type: application
+    platform: watchOS
+    sources: [Watch]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: at.studiotri.iphone.watchkitapp
+      TARGETED_DEVICE_FAMILY: '4'
+      INFOPLIST_KEY_WKCompanionAppBundleIdentifier: at.studiotri.iphone
+    info:
+      path: Watch/Info.plist
+      properties:
+        CFBundleDisplayName: Studio Tri Puls
+        WKCompanionAppBundleIdentifier: at.studiotri.iphone
+        NSHealthShareUsageDescription: Herzfrequenz während des Indoor-Triathlons erfassen.
+        NSHealthUpdateUsageDescription: Das Pulstraining in Apple Health speichern.
+        WKBackgroundModes: [workout-processing]
+    entitlements:
+      path: Watch/StudioTriWatch.entitlements
+      properties:
+        com.apple.developer.healthkit: true
