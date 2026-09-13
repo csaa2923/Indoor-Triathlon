@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a0c10">
+<meta name="theme-color" content="#07090d">
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,32 +17,49 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>
 :root{
-  --bg:#0a0c10;
-  --surface:#12151c;
-  --surface-2:#1a1e28;
-  --text:#f3f5f8;
+  --bg:#07090d;
+  --surface:#10141c;
+  --surface-2:#181d28;
+  --text:#f4f6fa;
   --muted:#8b93a7;
   --line:#2a3140;
-  --accent:#3dd68c;
-  --accent-ink:#06281a;
-  --row:#6ea8ff;
-  --bike:#f0b429;
-  --run:#ff7a59;
+  --accent:#2ee59d;
+  --accent-ink:#042017;
+  --row:#5b9dff;
+  --bike:#ffc14a;
+  --run:#ff6b4a;
   --danger:#ef4444;
   --danger-ink:#fff;
-  --ok:#3dd68c;
+  --ok:#2ee59d;
+  --slow:#ff8a7a;
   --radius:18px;
-  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:ui-monospace,"SF Mono","Cascadia Mono","Consolas",monospace;
+  --font:"Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono","Consolas",monospace;
   --pad:max(16px, env(safe-area-inset-left));
+  --fs-xs:11px;
+  --fs-sm:13px;
+  --fs-md:15px;
+  --fs-lg:18px;
+  --fs-xl:22px;
+  --fs-2xl:28px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);min-height:100%}
 body{
   min-height:100dvh;
   background:
-    radial-gradient(900px 420px at 50% -80px, rgba(61,214,140,.12), transparent 60%),
+    radial-gradient(920px 460px at 50% -90px, rgba(46,229,157,.14), transparent 58%),
+    radial-gradient(520px 280px at 100% 12%, rgba(91,157,255,.08), transparent 60%),
+    radial-gradient(480px 240px at 0% 40%, rgba(255,107,74,.06), transparent 55%),
     var(--bg);
+}
+body::before{
+  content:"";
+  pointer-events:none;
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(
+    -18deg, transparent, transparent 22px, rgba(255,255,255,.015) 22px, rgba(255,255,255,.015) 23px
+  );
 }
 .skip{
   position:absolute;left:-999px;top:8px;background:var(--accent);color:var(--accent-ink);
@@ -50,32 +67,44 @@ body{
 }
 .skip:focus{left:12px}
 .app{
-  display:flex;flex-direction:column;gap:14px;
+  position:relative;
+  display:flex;flex-direction:column;gap:16px;
   max-width:760px;margin:0 auto;
-  padding:max(12px, env(safe-area-inset-top)) var(--pad) max(28px, env(safe-area-inset-bottom));
+  padding:max(14px, env(safe-area-inset-top)) var(--pad) max(32px, env(safe-area-inset-bottom));
 }
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;order:0}
-.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
-.wordmark{font-weight:800;letter-spacing:.14em;font-size:13px;color:var(--accent)}
-.brand h1{margin:0;font-size:22px;letter-spacing:-.03em}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;order:0}
+.brand{display:flex;flex-direction:column;gap:6px;min-width:0}
+.brand-row{display:flex;align-items:center;gap:10px}
+.logo{width:40px;height:40px;flex-shrink:0;border-radius:12px;box-shadow:0 0 0 1px var(--line)}
+.wordmark{font-weight:800;letter-spacing:.16em;font-size:var(--fs-xs);color:var(--accent)}
+.brand h1{margin:0;font-size:var(--fs-xl);letter-spacing:-.03em;line-height:1.15}
+.tagline{margin:0;color:var(--muted);font-size:var(--fs-sm);letter-spacing:.04em}
 .tools{display:flex;gap:8px;flex-shrink:0}
 .iconbtn{
-  width:42px;height:42px;border:1px solid var(--line);background:var(--surface);
+  width:44px;height:44px;border:1px solid var(--line);background:var(--surface);
   color:var(--text);border-radius:12px;padding:0;display:grid;place-items:center;cursor:pointer
 }
 .iconbtn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.iconbtn[aria-pressed="false"]{opacity:.72}
 .iconbtn svg{width:20px;height:20px}
+.iconbtn:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px
+}
 .hud{
   order:3;background:var(--surface);border:1px solid var(--line);border-radius:24px;
-  padding:20px 18px 18px;text-align:center
+  padding:22px 18px 18px;text-align:center
 }
-.kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.phase{margin:8px 0 0;font-size:28px;font-weight:800;letter-spacing:-.03em}
+.kicker{font-size:var(--fs-xs);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.phase{margin:8px 0 0;font-size:var(--fs-2xl);font-weight:800;letter-spacing:-.03em}
 .clock{
-  font-family:var(--mono);font-size:clamp(42px,12vw,64px);font-weight:800;
-  font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1.05;margin:8px 0 14px
+  font-family:var(--mono);font-size:clamp(48px,13vw,72px);font-weight:800;
+  font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1.05;margin:10px 0 16px
 }
-.clock.is-live{color:var(--accent)}
+.clock.is-live{color:var(--accent);animation:pulse-live 2.4s ease-in-out infinite}
+@keyframes pulse-live{
+  0%,100%{text-shadow:0 0 0 transparent}
+  50%{text-shadow:0 0 28px rgba(46,229,157,.28)}
+}
 .splits{
   display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;
   margin:0 0 16px;text-align:center
@@ -83,19 +112,21 @@ body{
 .split{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
 .split span{display:block;color:var(--muted);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
 .split strong{display:block;margin-top:4px;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
-.split.is-on{border-color:currentColor}
+.split .mini{width:16px;height:16px;margin:0 auto 4px;display:block}
+.split.is-on{border-color:currentColor;box-shadow:0 0 0 1px currentColor inset}
 .split[data-k="row"].is-on{color:var(--row)}
 .split[data-k="bike"].is-on{color:var(--bike)}
 .split[data-k="run"].is-on{color:var(--run)}
 .split[data-k="t1"].is-on,.split[data-k="t2"].is-on{color:var(--accent)}
 .cta{
-  width:100%;min-height:58px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);
-  font-size:18px;font-weight:800;cursor:pointer
+  width:100%;min-height:60px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);
+  font-size:var(--fs-lg);font-weight:800;cursor:pointer
 }
-.cta:disabled{opacity:.55;cursor:default}
+.cta:hover{filter:brightness(1.06)}
+.cta:disabled{opacity:.55;cursor:default;filter:none}
 .btnrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 button{
-  border:0;border-radius:12px;padding:11px 15px;font-size:15px;font-weight:700;
+  border:0;border-radius:12px;padding:11px 15px;font-size:var(--fs-md);font-weight:700;
   font-family:inherit;cursor:pointer;color:var(--text)
 }
 .secondary{background:var(--surface-2);border:1px solid var(--line)}
@@ -103,16 +134,22 @@ button{
 .ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
 .status{margin:12px 0 0;color:var(--muted);font-size:14px;line-height:1.45;min-height:2.8em}
 .stepper{order:4;display:flex;gap:6px;align-items:center;overflow:auto;padding:2px}
-.step{flex:1;min-width:52px;text-align:center;font-size:11px;color:var(--muted);font-weight:700}
+.step{flex:1;min-width:52px;text-align:center;font-size:var(--fs-xs);color:var(--muted);font-weight:700}
 .step i{
   display:block;height:4px;border-radius:99px;background:var(--line);margin-bottom:6px
 }
 .step.is-done i{background:var(--accent)}
 .step.is-on{color:var(--text)}
-.step.is-on i{background:var(--accent)}
+.step.is-on i{
+  background:linear-gradient(90deg,var(--accent),#9effd8,var(--accent));
+  background-size:24px 100%;
+  animation:bar-flow 1s linear infinite
+}
+@keyframes bar-flow{to{background-position:24px 0}}
 .plan{order:2;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
-.legs,.board{order:5}
+.legs,.board,.log{order:5}
 .board{order:6}
+.log{order:7}
 body.is-live .hud{order:1}
 body.is-live .stepper{order:2}
 body.is-live .legs{order:3}
@@ -121,16 +158,26 @@ h2{margin:0 0 12px;font-size:16px;letter-spacing:-.02em}
 .presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .preset{
   background:var(--surface-2);border:1px solid var(--line);border-radius:14px;
-  text-align:left;min-height:74px;padding:12px
+  text-align:left;min-height:78px;padding:12px
 }
 .preset small{display:block;color:var(--muted);font-weight:500;margin-top:5px;font-size:12px}
-.preset[aria-pressed="true"]{border-color:var(--accent);background:#123226;color:var(--text)}
+.preset .dots{display:flex;gap:5px;margin-bottom:8px}
+.preset .dots b{width:7px;height:7px;border-radius:99px;display:block}
+.preset .dots b:nth-child(1){background:var(--row)}
+.preset .dots b:nth-child(2){background:var(--bike)}
+.preset .dots b:nth-child(3){background:var(--run)}
+.preset[aria-pressed="true"]{border-color:var(--accent);background:#10261c;color:var(--text)}
 .summary{
   margin-top:12px;padding:11px 12px;border-left:3px solid var(--accent);
   border-radius:10px;background:#10261c;font-size:14px;line-height:1.5
 }
 .summary.error{border-color:var(--danger);background:#2a1618}
-.hint{color:var(--muted);font-size:13px;line-height:1.45;margin:10px 0 0}
+.format-note{
+  margin-top:12px;padding:12px;border:1px solid #2a3a58;border-radius:12px;
+  background:rgba(91,157,255,.08);font-size:var(--fs-sm);line-height:1.5;color:#d5dceb
+}
+.format-note strong{display:block;color:var(--row);margin-bottom:4px}
+.hint{color:var(--muted);font-size:var(--fs-sm);line-height:1.45;margin:10px 0 0}
 .panel,.leg{
   background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
   padding:16px;margin-bottom:12px
@@ -141,8 +188,17 @@ h2{margin:0 0 12px;font-size:16px;letter-spacing:-.02em}
 .leg[data-leg="run"].is-on{color:var(--run)}
 .leg.is-done{opacity:.88}
 .leg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;color:var(--text)}
-.leg-index{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:800}
-.leg-time{font-family:var(--mono);font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.leg-title{display:flex;align-items:center;gap:10px}
+.leg-mark{
+  width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;
+  background:var(--surface-2);border:1px solid var(--line)
+}
+.leg-mark svg{width:22px;height:22px}
+.leg[data-leg="row"] .leg-mark{color:var(--row)}
+.leg[data-leg="bike"] .leg-mark{color:var(--bike)}
+.leg[data-leg="run"] .leg-mark{color:var(--run)}
+.leg-index{display:block;font-size:var(--fs-xs);letter-spacing:.14em;color:var(--muted);font-weight:800}
+.leg-time{font-family:var(--mono);font-size:var(--fs-2xl);font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
 input{
@@ -154,24 +210,50 @@ input:focus{border-color:var(--accent)}
 .pace-pair input{width:70px;text-align:center}
 .calc{margin-top:12px;padding:11px 12px;border-left:3px solid var(--accent);border-radius:10px;background:#10261c;font-size:14px;line-height:1.5;color:var(--text)}
 .calc.error{border-color:var(--danger);background:#2a1618}
-.smallbtn{padding:10px 12px;font-size:13px}
+.smallbtn{padding:10px 12px;font-size:var(--fs-sm)}
 details{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--text)}
 summary{cursor:pointer;color:var(--accent);font-weight:700}
 details ol{padding-left:22px;font-size:14px;line-height:1.5;color:#d5dceb}
 details li{margin:6px 0}
 a{color:#8ee4b8}
+.athlete{margin-bottom:14px}
+.race-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
+.race-who{margin:4px 0 0;color:var(--muted);font-size:var(--fs-sm)}
+.race-total{text-align:right}
+.race-total span{display:block;color:var(--muted);font-size:var(--fs-xs);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.race-total strong{display:block;font-family:var(--mono);font-size:clamp(28px,8vw,40px);letter-spacing:-.04em}
+.delta{display:block;margin-top:4px;font-size:var(--fs-sm);font-weight:700}
+.delta.is-fast{color:var(--ok)}
+.delta.is-slow{color:var(--slow)}
 .result{background:#0d1016;border:1px solid var(--line);border-radius:16px;padding:6px 16px}
-.row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px}
+.row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:var(--fs-md)}
 .row:last-child{border:0}
-.row.total{font-size:18px;font-weight:800}
+.row.total{font-size:var(--fs-lg);font-weight:800}
 .row small{display:block;color:var(--muted);font-weight:500;font-size:12px;margin-top:3px}
-.history-entry{border-bottom:1px solid var(--line);padding:12px 0;line-height:1.5;color:var(--text)}
+.board.is-final .result{border-color:#245c44;box-shadow:0 0 0 1px rgba(46,229,157,.18)}
+.empty{
+  text-align:center;padding:28px 16px;color:var(--muted);border:1px dashed var(--line);
+  border-radius:16px;background:#0d1016
+}
+.empty svg{width:56px;height:56px;margin:0 auto 12px;display:block}
+.empty strong{display:block;color:var(--text);margin-bottom:6px}
+.log-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px
+}
+.stat{
+  background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center
+}
+.stat span{display:block;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.stat strong{display:block;margin-top:4px;font-size:var(--fs-md)}
+.history-entry{border-bottom:1px solid var(--line);padding:14px 0;line-height:1.5;color:var(--text)}
+.history-entry:last-child{border:0}
 .history-entry .meta{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.best{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;margin-top:8px}
+.history-entry .bar{height:3px;border-radius:99px;margin:8px 0 10px;background:linear-gradient(90deg,var(--row),var(--bike),var(--run))}
+.best{color:var(--accent);font-size:var(--fs-xs);font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;margin-top:8px}
 .banner{
   order:1;display:none;background:#123226;border:1px solid #245c44;color:#d8f5e6;
-  border-radius:14px;padding:10px 12px;font-size:13px
+  border-radius:14px;padding:10px 12px;font-size:var(--fs-sm)
 }
 .banner.is-on{display:block}
 .banner.warn{background:#2a2410;border-color:#6b5a22;color:#f3e6b3}
@@ -181,16 +263,29 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
 }
 .modal{
   border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--text);
-  padding:20px;width:min(420px, calc(100vw - 32px))
+  padding:22px;width:min(440px, calc(100vw - 32px))
 }
-.modal::backdrop{background:rgba(0,0,0,.62)}
+.modal::backdrop{background:rgba(0,0,0,.66)}
 .modal p{margin:0 0 16px;line-height:1.45}
+.onboard-mark{width:56px;height:56px;margin:0 auto 12px;display:block}
+.onboard h2{text-align:center;margin-bottom:16px}
+.onboard-steps{list-style:none;padding:0;margin:0 0 18px}
+.onboard-steps li{display:flex;gap:12px;margin:0 0 14px;align-items:flex-start}
+.onboard-steps .dot{width:10px;height:10px;border-radius:99px;margin-top:6px;flex-shrink:0}
+.onboard-steps .dot.row{background:var(--row)}
+.onboard-steps .dot.bike{background:var(--bike)}
+.onboard-steps .dot.run{background:var(--run)}
+.onboard-steps strong{display:block;margin-bottom:3px}
+.onboard-steps p{margin:0;color:var(--muted);font-size:var(--fs-sm)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (max-width:560px){
   .fields{grid-template-columns:1fr}
   .splits{grid-template-columns:repeat(3,1fr)}
   .split[data-k="t1"],.split[data-k="t2"]{grid-column:span 1}
-  .clock{font-size:48px}
+  .clock{font-size:52px}
+  .log-stats{grid-template-columns:1fr}
+  .race-head{flex-direction:column;align-items:flex-start}
+  .race-total{text-align:left}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
@@ -202,10 +297,25 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <div class="wordmark">STUDIO TRI</div>
-      <h1>Indoor Triathlon</h1>
+      <div class="brand-row">
+        <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="16" fill="#07090d"/>
+          <path d="M32 11 A21 21 0 0 1 51.47 39.87" fill="none" stroke="#5b9dff" stroke-width="7.4" stroke-linecap="round"/>
+          <path d="M50.18 42.5 A21 21 0 0 1 15.45 45.07" fill="none" stroke="#ffc14a" stroke-width="7.4" stroke-linecap="round"/>
+          <path d="M13.8 42.5 A21 21 0 0 1 32 11" fill="none" stroke="#ff6b4a" stroke-width="7.4" stroke-linecap="round"/>
+          <circle cx="32" cy="32" r="3.2" fill="#2ee59d"/>
+        </svg>
+        <div>
+          <div class="wordmark">STUDIO TRI</div>
+          <h1>Indoor Triathlon</h1>
+        </div>
+      </div>
+      <p class="tagline">Rudern · Rad · Lauf · Studio</p>
     </div>
     <div class="tools">
+      <button type="button" class="iconbtn" id="helpBtn" aria-label="So funktioniert Studio Tri" title="So funktioniert's">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 114 2c-.7.6-1.5 1-1.5 2v.5"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg>
+      </button>
       <button type="button" class="iconbtn" id="soundBtn" aria-pressed="true" aria-label="Ton und Vibration" title="Ton und Vibration">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/></svg>
       </button>
@@ -224,23 +334,33 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
 
   <section class="plan" id="planBox" aria-labelledby="planTitle">
     <h2 id="planTitle">Strecke</h2>
+    <div class="athlete">
+      <label for="athlete">Athlet / Athletin</label>
+      <input id="athlete" type="text" maxlength="60" placeholder="Name auf der Zieltafel" autocomplete="name">
+    </div>
     <div class="presets">
-      <button type="button" class="preset" data-preset="studio">Studio-Start<small>2.000 m · 10 km · 5 km</small></button>
-      <button type="button" class="preset" data-preset="beginner">Einsteiger<small>1.000 m · 5 km · 2,5 km</small></button>
-      <button type="button" class="preset" data-preset="sprint">Sprint<small>2.000 m · 20 km · 5 km</small></button>
-      <button type="button" class="preset" data-preset="competition">Wettkampf<small>2.000 m · 40 km · 10 km</small></button>
+      <button type="button" class="preset" data-preset="studio" aria-label="Studio-Start: 2000 Meter Rudern, 10 Kilometer Rad, 5 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Studio-Start<small>2.000 m · 10 km · 5 km</small>
+      </button>
+      <button type="button" class="preset" data-preset="beginner" aria-label="Einsteiger: 1000 Meter Rudern, 5 Kilometer Rad, 2,5 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Einsteiger<small>1.000 m · 5 km · 2,5 km</small>
+      </button>
+      <button type="button" class="preset" data-preset="sprint" aria-label="Sprint: 2000 Meter Rudern, 20 Kilometer Rad, 5 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Sprint<small>2.000 m · 20 km · 5 km</small>
+      </button>
+      <button type="button" class="preset" data-preset="competition" aria-label="Wettkampf: 2000 Meter Rudern, 40 Kilometer Rad, 10 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Wettkampf<small>2.000 m · 40 km · 10 km</small>
+      </button>
     </div>
     <div class="summary" id="planSummary"></div>
-    <p class="hint">Eigenes Studio-Format: statt Schwimmen wird gerudert. Sprint- und Wettkampf-Rad/Lauf entsprechen den offiziellen Distanzen. Werte sind in den Disziplinen änderbar.</p>
-    <details>
-      <summary>Name auf dem Ergebnis</summary>
-      <div class="fields" style="grid-template-columns:1fr">
-        <div>
-          <label for="athlete">Athlet / Athletin</label>
-          <input id="athlete" type="text" maxlength="60" placeholder="Optional" autocomplete="name">
-        </div>
-      </div>
-    </details>
+    <aside class="format-note">
+      <strong>Indoor-Format</strong>
+      Rudern ersetzt das Schwimmen. Offizielle World-Triathlon-Schwimmdistanzen gelten hier nicht. Sprint- und Wettkampf-Rad/Lauf folgen den offiziellen Strecken. Werte sind in den Disziplinen änderbar.
+    </aside>
   </section>
 
   <section class="hud" aria-labelledby="hudPhase">
@@ -248,11 +368,20 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
     <div class="phase" id="hudPhase">Bereit</div>
     <div class="clock" id="totalClock">00:00:00</div>
     <div class="splits" aria-label="Zwischenzeiten">
-      <div class="split" data-k="row"><span>Rudern</span><strong id="sRow">00:00:00</strong></div>
+      <div class="split" data-k="row">
+        <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 17h13"/><rect x="8" y="14.2" width="6" height="3.2" rx=".8"/><path d="M7 16L4 7"/><path d="M3.2 5.4c1.6-.8 4 .2 4.6 2.2"/></svg>
+        <span>Rudern</span><strong id="sRow">00:00:00</strong>
+      </div>
       <div class="split" data-k="t1"><span>T1</span><strong id="sT1">00:00:00</strong></div>
-      <div class="split" data-k="bike"><span>Rad</span><strong id="sBike">00:00:00</strong></div>
+      <div class="split" data-k="bike">
+        <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="16.5" r="3.2"/><circle cx="17.5" cy="16.5" r="3.2"/><path d="M6.5 16.5L11 8.5h5.2M11 8.5l5.2 8"/></svg>
+        <span>Rad</span><strong id="sBike">00:00:00</strong>
+      </div>
       <div class="split" data-k="t2"><span>T2</span><strong id="sT2">00:00:00</strong></div>
-      <div class="split" data-k="run"><span>Lauf</span><strong id="sRun">00:00:00</strong></div>
+      <div class="split" data-k="run">
+        <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="15.2" cy="5.6" r="2"/><path d="M13.8 9.2l-3 3.2-3.2 5.2M13.8 9.2l3.2 4.6 3.4-1.4M10.8 12.4l4.6-.6-2.8 7"/></svg>
+        <span>Lauf</span><strong id="sRun">00:00:00</strong>
+      </div>
     </div>
     <button type="button" class="cta" id="raceAction">Rudern starten</button>
     <div class="btnrow" style="margin-top:10px">
@@ -274,9 +403,14 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
   <div class="legs">
     <section class="leg" id="leg-row" data-leg="row">
       <div class="leg-head">
-        <div>
-          <span class="leg-index">01</span>
-          <h2>Rudern</h2>
+        <div class="leg-title">
+          <div class="leg-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17h13"/><rect x="8" y="14.2" width="6" height="3.2" rx=".8"/><path d="M7 16L4 7"/><path d="M3.2 5.4c1.6-.8 4 .2 4.6 2.2"/></svg>
+          </div>
+          <div>
+            <span class="leg-index">01</span>
+            <h2>Rudern</h2>
+          </div>
         </div>
         <div class="leg-time" id="rowClock">00:00:00</div>
       </div>
@@ -312,9 +446,14 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
 
     <section class="leg" id="leg-bike" data-leg="bike">
       <div class="leg-head">
-        <div>
-          <span class="leg-index">02</span>
-          <h2>Fahrrad</h2>
+        <div class="leg-title">
+          <div class="leg-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="16.5" r="3.2"/><circle cx="17.5" cy="16.5" r="3.2"/><path d="M6.5 16.5L11 8.5h5.2M11 8.5l5.2 8"/></svg>
+          </div>
+          <div>
+            <span class="leg-index">02</span>
+            <h2>Fahrrad</h2>
+          </div>
         </div>
         <div class="leg-time" id="bikeClock">00:00:00</div>
       </div>
@@ -331,13 +470,26 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <button type="button" class="secondary smallbtn" data-stop="bike">Stopp / Wechsel</button>
         <button type="button" class="secondary smallbtn" data-finish="bike">Ziel erreicht</button>
       </div>
+      <details>
+        <summary>Ergometer einstellen</summary>
+        <ol>
+          <li>Modus „Distanz“ oder manuelle km/h, dieselbe Zielstrecke wie oben.</li>
+          <li>Widerstand und Gang selbst wählen. Die App steuert das Gerät nicht.</li>
+          <li>Anzeige am Ergometer ablesen und nach der Einheit unter „Tatsächlich“ eintragen, falls sie abweicht.</li>
+        </ol>
+      </details>
     </section>
 
     <section class="leg" id="leg-run" data-leg="run">
       <div class="leg-head">
-        <div>
-          <span class="leg-index">03</span>
-          <h2>Laufband</h2>
+        <div class="leg-title">
+          <div class="leg-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="15.2" cy="5.6" r="2"/><path d="M13.8 9.2l-3 3.2-3.2 5.2M13.8 9.2l3.2 4.6 3.4-1.4M10.8 12.4l4.6-.6-2.8 7"/></svg>
+          </div>
+          <div>
+            <span class="leg-index">03</span>
+            <h2>Laufband</h2>
+          </div>
         </div>
         <div class="leg-time" id="runClock">00:00:00</div>
       </div>
@@ -355,32 +507,74 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <button type="button" class="secondary smallbtn" data-stop="run">Stopp</button>
         <button type="button" class="secondary smallbtn" data-finish="run">Ziel erreicht</button>
       </div>
+      <details>
+        <summary>Laufband einstellen</summary>
+        <ol>
+          <li>Geschwindigkeit in km/h setzen. Optional Distanzziel am Gerät, falls vorhanden.</li>
+          <li>Steigung ist Studio-Wahl, keine World-Triathlon-Vorgabe.</li>
+          <li>Distanz am Laufband-Display ablesen. Die App verbindet sich nicht mit dem Gerät.</li>
+        </ol>
+      </details>
     </section>
   </div>
 
-  <section class="board" aria-labelledby="resultTitle">
+  <section class="board" id="raceBoard" aria-labelledby="resultTitle">
     <div class="panel" style="margin:0">
-      <h2 id="resultTitle">Ergebnis</h2>
-      <div class="result">
+      <div class="race-head">
+        <div>
+          <p class="kicker">Zieltafel</p>
+          <h2 id="resultTitle">Ergebnis</h2>
+          <p class="race-who" id="raceWho">Name, Format und Datum erscheinen nach dem Start.</p>
+        </div>
+        <div class="race-total">
+          <span>Gesamt</span>
+          <strong id="rTotal">00:00:00</strong>
+          <small class="delta" id="rTotalDelta"></small>
+        </div>
+      </div>
+      <div class="empty" id="resultEmpty">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="16" fill="#07090d"/>
+          <path d="M32 11 A21 21 0 0 1 51.47 39.87" fill="none" stroke="#5b9dff" stroke-width="7.4" stroke-linecap="round"/>
+          <path d="M50.18 42.5 A21 21 0 0 1 15.45 45.07" fill="none" stroke="#ffc14a" stroke-width="7.4" stroke-linecap="round"/>
+          <path d="M13.8 42.5 A21 21 0 0 1 32 11" fill="none" stroke="#ff6b4a" stroke-width="7.4" stroke-linecap="round"/>
+          <circle cx="32" cy="32" r="3.2" fill="#2ee59d"/>
+        </svg>
+        <strong>Noch keine Zielzeit</strong>
+        Distanz wählen und den großen Knopf tippen. Splits, T1/T2 und Planvergleich erscheinen hier.
+      </div>
+      <div class="result" id="resultLive" hidden>
         <div class="row"><span>Rudern<small id="rRowMeta">–</small></span><strong id="rRow">–</strong></div>
-        <div class="row"><span>Wechsel T1</span><strong id="rT1">00:00:00</strong></div>
+        <div class="row"><span>Wechsel T1<small id="rT1Meta"></small></span><strong id="rT1">00:00:00</strong></div>
         <div class="row"><span>Fahrrad<small id="rBikeMeta">–</small></span><strong id="rBike">–</strong></div>
-        <div class="row"><span>Wechsel T2</span><strong id="rT2">00:00:00</strong></div>
+        <div class="row"><span>Wechsel T2<small id="rT2Meta"></small></span><strong id="rT2">00:00:00</strong></div>
         <div class="row"><span>Laufband<small id="rRunMeta">–</small></span><strong id="rRun">–</strong></div>
-        <div class="row"><span>Weitere Wechsel / Vorbereitung</span><strong id="rOther">00:00:00</strong></div>
-        <div class="row total"><span>Gesamt</span><strong id="rTotal">00:00:00</strong></div>
+        <div class="row"><span>Weitere Wechsel / Vorbereitung<small>Gesamt minus Disziplinen und T1/T2</small></span><strong id="rOther">00:00:00</strong></div>
+        <div class="row total"><span>Gesamt<small id="rPlanMeta"></small></span><strong id="rTotalCopy">00:00:00</strong></div>
       </div>
       <div class="btnrow" style="margin-top:14px">
         <button type="button" class="cta" id="saveBtn" style="width:auto;min-height:46px;padding:12px 18px">Ergebnis speichern</button>
         <button type="button" class="secondary" id="shareBtn">Teilen</button>
-        <button type="button" class="secondary" id="historyBtn">Verlauf</button>
+        <button type="button" class="secondary" id="historyBtn">Zum Log</button>
       </div>
-      <div id="historyBox" class="hint"></div>
+    </div>
+  </section>
+
+  <section class="log" id="log" aria-labelledby="logTitle">
+    <div class="panel" style="margin:0">
+      <h2 id="logTitle">Trainingslog</h2>
+      <div class="log-stats" id="logStats" hidden>
+        <div class="stat"><span>Einheiten</span><strong id="statCount">0</strong></div>
+        <div class="stat"><span>Bestzeit</span><strong id="statBest">–</strong></div>
+        <div class="stat"><span>Zuletzt</span><strong id="statLast">–</strong></div>
+      </div>
+      <div id="historyBox"></div>
     </div>
   </section>
 
   <footer>
-    Alle Daten bleiben in diesem Browser. Keine Geräteverbindung. Für Display-an, Teilen und Home-Bildschirm <code>start.bat</code> nutzen.<br>
+    Alle Daten bleiben in diesem Browser. Keine Geräteverbindung, kein Konto, keine Werbung.<br>
+    Display-an, Teilen und Home-Bildschirm: <code>start.bat</code> — nicht die Datei direkt öffnen.<br>
     Quellen:
     <a href="https://www.triathlonquebec.org/wp-content/uploads/2026/03/World-Triathlon_Competition-Rules_2026.pdf" target="_blank" rel="noopener noreferrer">World Triathlon, Regeln 2026 (Anhang A)</a>
     ·
@@ -396,6 +590,42 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
       <button type="submit" value="ok" class="danger" id="confirmOk">Bestätigen</button>
     </div>
   </form>
+</dialog>
+
+<dialog class="modal onboard" id="onboardDialog" aria-labelledby="onboardTitle">
+  <svg class="onboard-mark" viewBox="0 0 64 64" aria-hidden="true">
+    <rect width="64" height="64" rx="16" fill="#07090d"/>
+    <path d="M32 11 A21 21 0 0 1 51.47 39.87" fill="none" stroke="#5b9dff" stroke-width="7.4" stroke-linecap="round"/>
+    <path d="M50.18 42.5 A21 21 0 0 1 15.45 45.07" fill="none" stroke="#ffc14a" stroke-width="7.4" stroke-linecap="round"/>
+    <path d="M13.8 42.5 A21 21 0 0 1 32 11" fill="none" stroke="#ff6b4a" stroke-width="7.4" stroke-linecap="round"/>
+    <circle cx="32" cy="32" r="3.2" fill="#2ee59d"/>
+  </svg>
+  <h2 id="onboardTitle">So trainierst du</h2>
+  <ol class="onboard-steps">
+    <li>
+      <span class="dot row"></span>
+      <div>
+        <strong>Indoor-Format</strong>
+        <p>Rudern → T1 → Rad → T2 → Lauf. Rudern ersetzt das Schwimmen. Das ist kein Freiwasser-Triathlon.</p>
+      </div>
+    </li>
+    <li>
+      <span class="dot bike"></span>
+      <div>
+        <strong>Ein Knopf im Studio</strong>
+        <p>Der große Knopf führt durch die Phasen. Leertaste geht auch. Das Display bleibt an, solange die Zeit läuft.</p>
+      </div>
+    </li>
+    <li>
+      <span class="dot run"></span>
+      <div>
+        <strong>Gerät und Ergebnis</strong>
+        <p>Strecke am Concept2, Ergometer oder Laufband ablesen. Speichern, teilen, Bestzeiten — alles bleibt lokal.</p>
+      </div>
+    </li>
+  </ol>
+  <button type="button" class="cta" id="onboardOk">Verstanden — loslegen</button>
+  <p class="hint" style="text-align:center">Jederzeit über das Fragezeichen oben erneut öffnen.</p>
 </dialog>
 
 <script>
@@ -415,6 +645,7 @@ const settingIds = ['rowGoal','bikeGoal','runGoal','paceMin','paceSec','bikeSpee
 const settingKey = 'indoorTriathlonSettingsV2';
 const sessionKey = 'indoorTriathlonActiveSessionV1';
 const historyKey = 'indoorTriathlonHistory';
+const onboardKey = 'indoorTriathlonOnboardedV1';
 const $ = id => document.getElementById(id);
 let selectedPreset = 'studio';
 let raceStage = 0;
@@ -454,6 +685,9 @@ function t1Now(){ return splits.t1 + (splits.pendingFrom === 'row' ? liveTransit
 function t2Now(){ return splits.t2 + (splits.pendingFrom === 'bike' ? liveTransition() : 0); }
 function otherNow(){
   return Math.max(0, current(total) - current(legs.row) - current(legs.bike) - current(legs.run) - t1Now() - t2Now());
+}
+function reduceMotion(){
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 function ask(text, okLabel='Bestätigen', danger=true){
@@ -588,6 +822,20 @@ function distLabel(k, value){
   if (value == null || value === '') return '–';
   return k === 'row' ? de(Number(value), 0) + ' m' : de(Number(String(value).replace(',', '.')), 2) + ' km';
 }
+function deltaText(actual, plan){
+  if (!Number.isFinite(actual) || !Number.isFinite(plan) || actual <= 0 || plan <= 0) return {text:'', fast:false};
+  const d = actual - plan;
+  const text = (d <= 0 ? '−' : '+') + fmt(Math.abs(d)) + (d <= 0 ? ' unter Plan' : ' über Plan');
+  return {text, fast: d <= 0};
+}
+function setDelta(id, actual, plan){
+  const el = $(id);
+  if (!el) return;
+  const d = deltaText(actual, plan);
+  el.textContent = d.text;
+  el.classList.toggle('is-fast', Boolean(d.text) && d.fast);
+  el.classList.toggle('is-slow', Boolean(d.text) && !d.fast);
+}
 
 function updateCalculators(){
   const g = goal('row'), m = valid('paceMin', 0, 30), s = valid('paceSec', 0, 59);
@@ -636,8 +884,8 @@ function updateRaceChrome(){
     'Radfahren läuft. Am Ziel den großen Knopf tippen.',
     'Wechsel zum Laufband. Die Gesamtzeit läuft weiter.',
     'Laufen läuft. Im Ziel den großen Knopf tippen.',
-    'Fertig. Ergebnis speichern oder teilen.',
-    'Das Ergebnis steht im Verlauf.'
+    'Fertig. Zieltafel prüfen, speichern oder teilen.',
+    'Das Ergebnis steht im Trainingslog.'
   ];
   $('raceHint').textContent = hints[raceStage];
   const doneAt = {1:2, 2:3, 3:4, 4:5, 5:6};
@@ -668,7 +916,29 @@ function updateRaceChrome(){
   $('totalClock').classList.toggle('is-live', total.running);
 }
 
+function fillRaceMeta(){
+  const plan = planned();
+  const athlete = $('athlete').value.trim();
+  const mode = presets[selectedPreset]?.label || 'Individuell';
+  const when = new Date().toLocaleString('de-AT', {weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+  $('raceWho').textContent = (athlete || 'Training') + ' · ' + mode + ' · ' + when;
+  const rowD = deltaText(current(legs.row), plan.row);
+  const bikeD = deltaText(current(legs.bike), plan.bike);
+  const runD = deltaText(current(legs.run), plan.run);
+  $('rRowMeta').textContent = distLabel('row', $('rowDist').value || goal('row')) + (plan.row ? ' · Plan ' + fmt(plan.row) + (rowD.text ? ' · ' + rowD.text : '') : '');
+  $('rBikeMeta').textContent = distLabel('bike', $('bikeDist').value || goal('bike')) + (plan.bike ? ' · Plan ' + fmt(plan.bike) + (bikeD.text ? ' · ' + bikeD.text : '') : '');
+  $('rRunMeta').textContent = distLabel('run', $('runDist').value || goal('run')) + (plan.run ? ' · Plan ' + fmt(plan.run) + (runD.text ? ' · ' + runD.text : '') : '');
+  $('rT1Meta').textContent = 'Wechsel Rudergerät → Ergometer';
+  $('rT2Meta').textContent = 'Wechsel Ergometer → Laufband';
+  $('rPlanMeta').textContent = plan.total ? 'Plan ' + fmt(plan.total) + ' ohne Wechsel' : '';
+  setDelta('rTotalDelta', current(total), plan.total);
+}
+
 function updateResults(){
+  const hasTime = current(total) > 0;
+  $('resultEmpty').hidden = hasTime;
+  $('resultLive').hidden = !hasTime;
+  $('raceBoard').classList.toggle('is-final', raceStage >= 6);
   $('totalClock').textContent = fmt(current(total));
   for (const k of Object.keys(legs)) $(legs[k].clock).textContent = fmt(current(legs[k]));
   $('sRow').textContent = fmt(current(legs.row));
@@ -683,10 +953,14 @@ function updateResults(){
   $('rT2').textContent = fmt(t2Now());
   $('rOther').textContent = fmt(otherNow());
   $('rTotal').textContent = fmt(current(total));
-  $('rRowMeta').textContent = distLabel('row', $('rowDist').value || goal('row'));
-  $('rBikeMeta').textContent = distLabel('bike', $('bikeDist').value || goal('bike'));
-  $('rRunMeta').textContent = distLabel('run', $('runDist').value || goal('run'));
+  $('rTotalCopy').textContent = fmt(current(total));
+  fillRaceMeta();
   updateRaceChrome();
+}
+
+function revealBoard(){
+  const el = $('raceBoard');
+  el.scrollIntoView({behavior: reduceMotion() ? 'auto' : 'smooth', block:'start'});
 }
 
 function stopLeg(k, asTransition=false){
@@ -803,6 +1077,7 @@ function finishLeg(k){
   saveSession();
   updateResults();
   syncWakeLock();
+  if (k === 'run') revealBoard();
 }
 
 function advanceRace(){
@@ -850,6 +1125,7 @@ function readHistory(){
 }
 
 function snapshot(){
+  const p = planned();
   return {
     date: new Date().toLocaleString('de-AT'),
     athlete: $('athlete').value.trim(),
@@ -867,23 +1143,30 @@ function snapshot(){
     t1: t1Now(),
     t2: t2Now(),
     other: otherNow(),
-    planned: planned().total
+    planned: p.total,
+    plannedRow: p.row,
+    plannedBike: p.bike,
+    plannedRun: p.run
   };
 }
 
 function formatResult(e){
   const who = e.athlete ? e.athlete + ' · ' : '';
+  const planLine = Number.isFinite(e.planned) ? 'Plan                      ' + fmt(e.planned) : '';
+  const totalDelta = deltaText(e.total, e.planned);
   return [
-    'STUDIO TRI · ' + who + (e.mode || 'Training'),
+    'STUDIO TRI · Indoor Triathlon',
+    who + (e.mode || 'Training'),
     e.date || '',
     '',
-    'Rudern   ' + (e.rowDist || e.rowGoal || '–') + ' m    ' + fmt(e.rowTime),
+    'Rudern   ' + (e.rowDist || e.rowGoal || '–') + ' m    ' + fmt(e.rowTime) + (e.plannedRow ? '   Plan ' + fmt(e.plannedRow) : ''),
     'T1                         ' + fmt(e.t1 || 0),
-    'Rad      ' + (e.bikeDist || e.bikeGoal || '–') + ' km   ' + fmt(e.bikeTime),
+    'Rad      ' + (e.bikeDist || e.bikeGoal || '–') + ' km   ' + fmt(e.bikeTime) + (e.plannedBike ? '   Plan ' + fmt(e.plannedBike) : ''),
     'T2                         ' + fmt(e.t2 || 0),
-    'Lauf     ' + (e.runDist || e.runGoal || '–') + ' km   ' + fmt(e.runTime),
-    'Gesamt                     ' + fmt(e.total)
-  ].join('\n');
+    'Lauf     ' + (e.runDist || e.runGoal || '–') + ' km   ' + fmt(e.runTime) + (e.plannedRun ? '   Plan ' + fmt(e.plannedRun) : ''),
+    'Gesamt                     ' + fmt(e.total) + (totalDelta.text ? '   ' + totalDelta.text : ''),
+    planLine
+  ].filter(x => x !== '').join('\n');
 }
 
 function saveResult(){
@@ -903,18 +1186,13 @@ function saveResult(){
     cue();
     status('Ergebnis gespeichert');
     updateResults();
+    revealBoard();
   } catch (_) {
     status('Speichern fehlgeschlagen · Browser-Speicher prüfen');
   }
 }
 
-async function shareResult(){
-  if (current(total) <= 0 && !readHistory().length) {
-    status('Kein Ergebnis zum Teilen.');
-    return;
-  }
-  const entry = current(total) > 0 ? snapshot() : readHistory()[0];
-  const text = formatResult(entry);
+async function shareText(text){
   try {
     if (navigator.share) {
       await navigator.share({title: 'Studio Tri', text});
@@ -932,6 +1210,21 @@ async function shareResult(){
   }
 }
 
+async function shareResult(){
+  if (current(total) <= 0 && !readHistory().length) {
+    status('Kein Ergebnis zum Teilen.');
+    return;
+  }
+  const entry = current(total) > 0 ? snapshot() : readHistory()[0];
+  await shareText(formatResult(entry));
+}
+
+async function shareHistory(i){
+  const e = readHistory()[i];
+  if (!e) return;
+  await shareText(formatResult(e));
+}
+
 function deleteHistory(i){
   const a = readHistory();
   a.splice(i, 1);
@@ -939,29 +1232,41 @@ function deleteHistory(i){
   showHistory();
 }
 
+function emptyLog(){
+  const box = document.createElement('div');
+  box.className = 'empty';
+  box.innerHTML = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#07090d"/><path d="M32 11 A21 21 0 0 1 51.47 39.87" fill="none" stroke="#5b9dff" stroke-width="7.4" stroke-linecap="round"/><path d="M50.18 42.5 A21 21 0 0 1 15.45 45.07" fill="none" stroke="#ffc14a" stroke-width="7.4" stroke-linecap="round"/><path d="M13.8 42.5 A21 21 0 0 1 32 11" fill="none" stroke="#ff6b4a" stroke-width="7.4" stroke-linecap="round"/><circle cx="32" cy="32" r="3.2" fill="#2ee59d"/></svg><strong>Trainingslog ist leer</strong>Nach dem Ziel speichern. Bestzeiten, Teilen und Löschen erscheinen hier — nur in diesem Browser.';
+  return box;
+}
+
 function showHistory(){
   const a = readHistory();
   const box = $('historyBox');
+  const stats = $('logStats');
   box.replaceChildren();
   if (!a.length) {
-    box.textContent = 'Noch keine gespeicherten Ergebnisse.';
+    stats.hidden = true;
+    box.append(emptyLog());
     return;
   }
+  stats.hidden = false;
+  const times = a.map(e => e.total).filter(t => Number.isFinite(t) && t > 0);
+  const best = times.length ? Math.min.apply(null, times) : null;
+  $('statCount').textContent = String(a.length);
+  $('statBest').textContent = best == null ? '–' : fmt(best);
+  $('statLast').textContent = a[0].date || '–';
   const bestByMode = {};
   a.forEach(e => {
     const key = e.mode || 'Training';
     if (Number.isFinite(e.total) && e.total > 0 && (bestByMode[key] == null || e.total < bestByMode[key])) bestByMode[key] = e.total;
   });
-  const title = document.createElement('strong');
-  title.textContent = 'Letzte Ergebnisse';
-  box.append(title);
   a.forEach((e, i) => {
     const div = document.createElement('div');
     div.className = 'history-entry';
     const head = document.createElement('div');
     head.className = 'meta';
     const left = document.createElement('strong');
-    left.textContent = (i+1) + '. ' + String(e.date || 'Ohne Datum') + ' · ' + String(e.mode || 'Training') + (e.athlete ? ' · ' + e.athlete : '');
+    left.textContent = (e.athlete ? e.athlete + ' · ' : '') + String(e.mode || 'Training') + ' · ' + String(e.date || 'Ohne Datum');
     head.append(left);
     if (bestByMode[e.mode || 'Training'] === e.total) {
       const badge = document.createElement('span');
@@ -969,9 +1274,14 @@ function showHistory(){
       badge.textContent = 'Bestzeit';
       head.append(badge);
     }
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.setAttribute('aria-hidden', 'true');
     const detail = document.createElement('div');
     const plan = Number.isFinite(e.planned) ? ' · Plan ' + fmt(e.planned) : '';
+    const dlt = deltaText(e.total, e.planned);
     detail.textContent = 'Gesamt ' + fmt(e.total) +
+      (dlt.text ? ' · ' + dlt.text : '') +
       ' · Rudern ' + (e.rowDist || '–') + ' m / ' + fmt(e.rowTime) +
       ' · T1 ' + fmt(e.t1 || 0) +
       ' · Rad ' + (e.bikeDist || '–') + ' km / ' + fmt(e.bikeTime) +
@@ -980,6 +1290,11 @@ function showHistory(){
     const actions = document.createElement('div');
     actions.className = 'btnrow';
     actions.style.marginTop = '8px';
+    const share = document.createElement('button');
+    share.type = 'button';
+    share.className = 'secondary smallbtn';
+    share.textContent = 'Teilen';
+    share.addEventListener('click', () => shareHistory(i));
     const del = document.createElement('button');
     del.type = 'button';
     del.className = 'ghost smallbtn';
@@ -987,8 +1302,8 @@ function showHistory(){
     del.addEventListener('click', async () => {
       if (await ask('Diesen Eintrag löschen?', 'Löschen')) deleteHistory(i);
     });
-    actions.append(del);
-    div.append(head, detail, actions);
+    actions.append(share, del);
+    div.append(head, bar, detail, actions);
     box.append(div);
   });
 }
@@ -1059,6 +1374,23 @@ async function installApp(){
   if (choice && choice.outcome === 'accepted') status('Studio Tri ist installiert. Vom Home-Bildschirm starten.');
 }
 
+function markOnboarded(){
+  try { localStorage.setItem(onboardKey, '1'); } catch (_) {}
+}
+
+function setupOnboarding(){
+  $('helpBtn').addEventListener('click', () => $('onboardDialog').showModal());
+  $('onboardOk').addEventListener('click', () => {
+    markOnboarded();
+    $('onboardDialog').close();
+    $('raceAction').focus();
+  });
+  let seen = false;
+  try { seen = localStorage.getItem(onboardKey) === '1'; } catch (_) {}
+  if (seen || restored || readHistory().length > 0 || current(total) > 0) return;
+  $('onboardDialog').showModal();
+}
+
 document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => selectPreset(b.dataset.preset)));
 document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => startLeg(b.dataset.start)));
 document.querySelectorAll('[data-stop]').forEach(b => b.addEventListener('click', () => stopLeg(b.dataset.stop, true)));
@@ -1068,11 +1400,17 @@ $('pauseBtn').addEventListener('click', pauseAll);
 $('resetBtn').addEventListener('click', resetAll);
 $('saveBtn').addEventListener('click', saveResult);
 $('shareBtn').addEventListener('click', shareResult);
-$('historyBtn').addEventListener('click', showHistory);
+$('historyBtn').addEventListener('click', () => {
+  showHistory();
+  $('log').scrollIntoView({behavior: reduceMotion() ? 'auto' : 'smooth', block:'start'});
+});
 $('soundBtn').addEventListener('click', toggleSound);
 $('fullBtn').addEventListener('click', toggleFullscreen);
 $('installBtn').addEventListener('click', installApp);
-$('athlete').addEventListener('input', saveSettings);
+$('athlete').addEventListener('input', () => {
+  saveSettings();
+  fillRaceMeta();
+});
 for (const id of settingIds) {
   $(id).addEventListener('input', () => {
     if (['rowGoal','bikeGoal','runGoal'].includes(id)) selectedPreset = 'custom';
@@ -1112,8 +1450,10 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('pagehide', saveSession);
 if (!document.documentElement.requestFullscreen) $('fullBtn').hidden = true;
 setupAppShell();
+setupOnboarding();
 updateCalculators();
 updateResults();
+showHistory();
 syncWakeLock();
 setInterval(updateResults, 250);
 </script>
