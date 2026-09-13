@@ -11,8 +11,10 @@
 <meta name="description" content="Professioneller Indoor-Triathlon-Timer für Rudergerät, Fahrradergometer und Laufband. Zeiten, Wechsel und Ergebnisse bleiben lokal.">
 <title>Studio Tri · Indoor Triathlon</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
 :root{
   --bg:#0a0c10;
@@ -172,6 +174,11 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
   border-radius:14px;padding:10px 12px;font-size:13px
 }
 .banner.is-on{display:block}
+.banner.warn{background:#2a2410;border-color:#6b5a22;color:#f3e6b3}
+.install-card{order:1}
+@media (display-mode: standalone){
+  .install-card{display:none}
+}
 .modal{
   border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--text);
   padding:20px;width:min(420px, calc(100vw - 32px))
@@ -205,10 +212,15 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
       <button type="button" class="iconbtn" id="fullBtn" aria-label="Vollbild" title="Vollbild">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
       </button>
+      <button type="button" class="iconbtn" id="installBtn" hidden aria-label="App installieren" title="App installieren">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      </button>
     </div>
   </header>
 
+  <div class="banner warn" id="fileBanner" hidden></div>
   <div class="banner" id="restoreBanner" hidden></div>
+  <div class="banner install-card" id="installCard" hidden></div>
 
   <section class="plan" id="planBox" aria-labelledby="planTitle">
     <h2 id="planTitle">Strecke</h2>
@@ -368,7 +380,7 @@ footer{order:7;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
   </section>
 
   <footer>
-    Alle Daten bleiben in diesem Browser. Keine Geräteverbindung.<br>
+    Alle Daten bleiben in diesem Browser. Keine Geräteverbindung. Für Display-an, Teilen und Home-Bildschirm <code>start.bat</code> nutzen.<br>
     Quellen:
     <a href="https://www.triathlonquebec.org/wp-content/uploads/2026/03/World-Triathlon_Competition-Rules_2026.pdf" target="_blank" rel="noopener noreferrer">World Triathlon, Regeln 2026 (Anhang A)</a>
     ·
@@ -410,6 +422,7 @@ let splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
 let soundOn = true;
 let wakeLock = null;
 let restored = false;
+let installPrompt = null;
 
 const names = {row:'Rudern', bike:'Radfahren', run:'Laufen'};
 const shortNames = {row:'Rudern', bike:'Rad', run:'Lauf'};
@@ -995,6 +1008,57 @@ async function toggleFullscreen(){
   }
 }
 
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+}
+
+function showBanner(id, text, warn=false){
+  const el = $(id);
+  if (!el) return;
+  el.hidden = false;
+  el.classList.add('is-on');
+  el.classList.toggle('warn', warn);
+  el.textContent = text;
+}
+
+function setupAppShell(){
+  if (location.protocol === 'file:') {
+    showBanner('fileBanner', 'Datei-Modus: Display-an, Teilen und Installation sind aus. Im Ordner start.bat doppelklicken — dann bleibt das Handy wach und die App lässt sich auf den Home-Bildschirm legen.', true);
+    return;
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+  if (isStandalone()) {
+    document.documentElement.classList.add('standalone');
+    return;
+  }
+  window.addEventListener('beforeinstallprompt', ev => {
+    ev.preventDefault();
+    installPrompt = ev;
+    $('installBtn').hidden = false;
+    showBanner('installCard', 'Als App installieren: oben den Download-Knopf tippen. Danach startet Studio Tri ohne Browserleiste, auch offline.');
+  });
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone;
+  if (ios) {
+    showBanner('installCard', 'iPhone: Teilen → „Zum Home-Bildschirm“. So bleibt das Display während des Trainings an, und die App läuft ohne Safari-Leiste.');
+  }
+}
+
+async function installApp(){
+  if (!installPrompt) {
+    status('Installation über das Browser-Menü: „App installieren“ oder auf dem iPhone Teilen → Zum Home-Bildschirm.');
+    return;
+  }
+  installPrompt.prompt();
+  const choice = await installPrompt.userChoice.catch(() => null);
+  installPrompt = null;
+  $('installBtn').hidden = true;
+  $('installCard').hidden = true;
+  $('installCard').classList.remove('is-on');
+  if (choice && choice.outcome === 'accepted') status('Studio Tri ist installiert. Vom Home-Bildschirm starten.');
+}
+
 document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => selectPreset(b.dataset.preset)));
 document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => startLeg(b.dataset.start)));
 document.querySelectorAll('[data-stop]').forEach(b => b.addEventListener('click', () => stopLeg(b.dataset.stop, true)));
@@ -1007,6 +1071,7 @@ $('shareBtn').addEventListener('click', shareResult);
 $('historyBtn').addEventListener('click', showHistory);
 $('soundBtn').addEventListener('click', toggleSound);
 $('fullBtn').addEventListener('click', toggleFullscreen);
+$('installBtn').addEventListener('click', installApp);
 $('athlete').addEventListener('input', saveSettings);
 for (const id of settingIds) {
   $(id).addEventListener('input', () => {
@@ -1046,6 +1111,7 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', saveSession);
 if (!document.documentElement.requestFullscreen) $('fullBtn').hidden = true;
+setupAppShell();
 updateCalculators();
 updateResults();
 syncWakeLock();
