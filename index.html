@@ -81,12 +81,14 @@ body::before{
 .tagline{margin:0;color:var(--muted);font-size:var(--fs-sm);letter-spacing:.04em}
 .tools{display:flex;gap:8px;flex-shrink:0}
 .iconbtn{
-  width:44px;height:44px;border:1px solid var(--line);background:var(--surface);
-  color:var(--text);border-radius:12px;padding:0;display:grid;place-items:center;cursor:pointer
+  min-width:48px;min-height:56px;border:1px solid var(--line);background:var(--surface);
+  color:var(--text);border-radius:12px;padding:4px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;cursor:pointer
 }
 .iconbtn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .iconbtn[aria-pressed="false"]{opacity:.72}
 .iconbtn svg{width:20px;height:20px}
+.tool-label{font-size:9px;font-weight:700;line-height:1.1;white-space:nowrap}
 .iconbtn:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{
   outline:2px solid var(--accent);outline-offset:2px
 }
@@ -226,6 +228,14 @@ a{color:#8ee4b8}
 .delta.is-fast{color:var(--ok)}
 .delta.is-slow{color:var(--slow)}
 .result{background:#0d1016;border:1px solid var(--line);border-radius:16px;padding:6px 16px}
+.analysis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.analysis-card{background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:10px 12px;min-width:0}
+.analysis-card span{display:block;color:var(--muted);font-size:var(--fs-xs);font-weight:700}
+.analysis-card strong{display:block;font-size:var(--fs-lg);font-variant-numeric:tabular-nums;margin-top:3px}
+.analysis-card small{display:block;color:var(--muted);font-size:var(--fs-xs);margin-top:2px}
+.analysis-note{color:var(--muted);font-size:var(--fs-sm);line-height:1.4;margin:12px 0 0}
+.analysis-note.warn{color:var(--slow)}
+[hidden]{display:none!important}
 .row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:var(--fs-md)}
 .row:last-child{border:0}
 .row.total{font-size:var(--fs-lg);font-weight:800}
@@ -279,6 +289,8 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
 .onboard-steps p{margin:0;color:var(--muted);font-size:var(--fs-sm)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (max-width:560px){
+  .topbar{flex-wrap:wrap}
+  .tools{width:100%;justify-content:flex-end;gap:6px}
   .fields{grid-template-columns:1fr}
   .splits{grid-template-columns:repeat(3,1fr)}
   .split[data-k="t1"],.split[data-k="t2"]{grid-column:span 1}
@@ -315,15 +327,19 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
     <div class="tools">
       <button type="button" class="iconbtn" id="helpBtn" aria-label="So funktioniert Studio Tri" title="So funktioniert's">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 114 2c-.7.6-1.5 1-1.5 2v.5"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg>
+        <span class="tool-label">Hilfe</span>
       </button>
-      <button type="button" class="iconbtn" id="soundBtn" aria-pressed="true" aria-label="Ton und Vibration" title="Ton und Vibration">
+      <button type="button" class="iconbtn" id="soundBtn" aria-pressed="true" aria-label="Ton und Vibration an" title="Ton und Vibration">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/></svg>
+        <span class="tool-label" id="soundLabel">Ton an</span>
       </button>
       <button type="button" class="iconbtn" id="fullBtn" aria-label="Vollbild" title="Vollbild">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        <span class="tool-label">Vollbild</span>
       </button>
       <button type="button" class="iconbtn" id="installBtn" hidden aria-label="App installieren" title="App installieren">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+        <span class="tool-label">App</span>
       </button>
     </div>
   </header>
@@ -549,9 +565,17 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <div class="row"><span>Fahrrad<small id="rBikeMeta">–</small></span><strong id="rBike">–</strong></div>
         <div class="row"><span>Wechsel T2<small id="rT2Meta"></small></span><strong id="rT2">00:00:00</strong></div>
         <div class="row"><span>Laufband<small id="rRunMeta">–</small></span><strong id="rRun">–</strong></div>
+        <div class="row"><span>Sportzeit<small>Rudern + Rad + Lauf, ohne Wechsel</small></span><strong id="rSport">00:00:00</strong></div>
         <div class="row"><span>Weitere Wechsel / Vorbereitung<small>Gesamt minus Disziplinen und T1/T2</small></span><strong id="rOther">00:00:00</strong></div>
         <div class="row total"><span>Gesamt<small id="rPlanMeta"></small></span><strong id="rTotalCopy">00:00:00</strong></div>
       </div>
+      <div class="analysis-grid" id="analysisGrid" hidden>
+        <div class="analysis-card"><span>Rudern · Ø Pace</span><strong id="avgRow">–</strong><small id="avgRowMeta">pro 500 m</small></div>
+        <div class="analysis-card"><span>Rad · Ø Tempo</span><strong id="avgBike">–</strong><small id="avgBikeMeta">km/h</small></div>
+        <div class="analysis-card"><span>Lauf · Ø Tempo</span><strong id="avgRun">–</strong><small id="avgRunMeta">km/h und min/km</small></div>
+        <div class="analysis-card"><span>Wechsel T1 + T2</span><strong id="avgChange">–</strong><small id="avgChangeMeta">ohne Vorbereitung</small></div>
+      </div>
+      <p class="analysis-note" id="analysisNote" hidden></p>
       <div class="btnrow" style="margin-top:14px">
         <button type="button" class="cta" id="saveBtn" style="width:auto;min-height:46px;padding:12px 18px">Ergebnis speichern</button>
         <button type="button" class="secondary" id="shareBtn">Teilen</button>
@@ -565,7 +589,7 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
       <h2 id="logTitle">Trainingslog</h2>
       <div class="log-stats" id="logStats" hidden>
         <div class="stat"><span>Einheiten</span><strong id="statCount">0</strong></div>
-        <div class="stat"><span>Bestzeit</span><strong id="statBest">–</strong></div>
+        <div class="stat"><span>Bestzeit · gewählte Strecke</span><strong id="statBest">–</strong></div>
         <div class="stat"><span>Zuletzt</span><strong id="statLast">–</strong></div>
       </div>
       <div id="historyBox"></div>
@@ -837,6 +861,51 @@ function setDelta(id, actual, plan){
   el.classList.toggle('is-slow', Boolean(d.text) && !d.fast);
 }
 
+// Nur tatsächlich abgelesene Strecken liefern belastbare Durchschnittswerte.
+function measuredDistance(k, value){
+  if (value == null || String(value).trim() === '') return null;
+  const n = Number(String(value).replace(',', '.'));
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+function sportTime(e){
+  return ['row','bike','run'].reduce((sum,k) => sum + (Number(e[k+'Time']) || 0), 0);
+}
+function average(k, distance, ms){
+  if (distance == null || !Number.isFinite(ms) || ms <= 0) return null;
+  const km = k === 'row' ? distance/1000 : distance;
+  return {speed: km*3600000/ms, pace: ms/(k === 'row' ? distance/500 : distance)};
+}
+function paceValue(ms){
+  const seconds = Math.round(ms/1000);
+  return String(Math.floor(seconds/60)).padStart(2,'0') + ':' + String(seconds%60).padStart(2,'0');
+}
+function legQuality(k, distance, ms, target){
+  const metric = average(k, distance, ms);
+  // Weit gefasste Plausibilitätsgrenzen sind ein Warnhinweis, keine Wettkampfregeln.
+  const ceiling = {row:30, bike:120, run:32}[k];
+  return {
+    metric,
+    plausible: Boolean(metric && metric.speed <= ceiling),
+    complete: Boolean(metric && metric.speed <= ceiling && Number.isFinite(Number(target)) &&
+      Math.abs(distance - Number(target)) <= Math.max(k === 'row' ? 1 : 0.01, Number(target)*0.001))
+  };
+}
+function raceQuality(e){
+  const legsQuality = Object.fromEntries(['row','bike','run'].map(k =>
+    [k, legQuality(k, measuredDistance(k,e[k+'Dist']), Number(e[k+'Time']), e[k+'Goal'])]));
+  return {legs:legsQuality,
+    implausible:Object.values(legsQuality).some(q => q.metric && !q.plausible),
+    complete:Object.values(legsQuality).every(q => q.complete) && Number(e.total) > 0};
+}
+function liveEntry(){
+  return Object.fromEntries(['row','bike','run'].flatMap(k => [
+    [k+'Time', current(legs[k])], [k+'Dist', $(k+'Dist').value], [k+'Goal', goal(k)]
+  ]).concat([['total',current(total)]]));
+}
+function comparison(e){
+  return raceQuality(e).complete ? deltaText(sportTime(e), Number(e.planned)) : {text:'',fast:false};
+}
+
 function updateCalculators(){
   const g = goal('row'), m = valid('paceMin', 0, 30), s = valid('paceSec', 0, 59);
   if (g == null || m == null || s == null || (m === 0 && s === 0)) {
@@ -918,20 +987,46 @@ function updateRaceChrome(){
 
 function fillRaceMeta(){
   const plan = planned();
+  const entry = liveEntry();
+  const quality = raceQuality(entry);
   const athlete = $('athlete').value.trim();
   const mode = presets[selectedPreset]?.label || 'Individuell';
   const when = new Date().toLocaleString('de-AT', {weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
   $('raceWho').textContent = (athlete || 'Training') + ' · ' + mode + ' · ' + when;
-  const rowD = deltaText(current(legs.row), plan.row);
-  const bikeD = deltaText(current(legs.bike), plan.bike);
-  const runD = deltaText(current(legs.run), plan.run);
-  $('rRowMeta').textContent = distLabel('row', $('rowDist').value || goal('row')) + (plan.row ? ' · Plan ' + fmt(plan.row) + (rowD.text ? ' · ' + rowD.text : '') : '');
-  $('rBikeMeta').textContent = distLabel('bike', $('bikeDist').value || goal('bike')) + (plan.bike ? ' · Plan ' + fmt(plan.bike) + (bikeD.text ? ' · ' + bikeD.text : '') : '');
-  $('rRunMeta').textContent = distLabel('run', $('runDist').value || goal('run')) + (plan.run ? ' · Plan ' + fmt(plan.run) + (runD.text ? ' · ' + runD.text : '') : '');
+  for (const [k,id] of [['row','rRowMeta'],['bike','rBikeMeta'],['run','rRunMeta']]) {
+    const d = measuredDistance(k, entry[k+'Dist']);
+    const q = quality.legs[k];
+    const dlt = q.complete ? deltaText(entry[k+'Time'], plan[k]) : {text:''};
+    $(id).textContent = (d == null ? 'Ziel ' : 'Ist ') + distLabel(k, d ?? goal(k)) +
+      (plan[k] ? ' · Plan ' + fmt(plan[k]) : '') +
+      (dlt.text ? ' · ' + dlt.text : '');
+  }
   $('rT1Meta').textContent = 'Wechsel Rudergerät → Ergometer';
   $('rT2Meta').textContent = 'Wechsel Ergometer → Laufband';
-  $('rPlanMeta').textContent = plan.total ? 'Plan ' + fmt(plan.total) + ' ohne Wechsel' : '';
-  setDelta('rTotalDelta', current(total), plan.total);
+  $('rPlanMeta').textContent = plan.total ? 'Plan Sportzeit ' + fmt(plan.total) + ' ohne Wechsel' : 'Inklusive Wechsel';
+  $('rSport').textContent = fmt(sportTime(entry));
+  $('analysisGrid').hidden = current(total) <= 0;
+  $('analysisNote').hidden = current(total) <= 0;
+  for (const [k,id,meta] of [['row','avgRow','avgRowMeta'],['bike','avgBike','avgBikeMeta'],['run','avgRun','avgRunMeta']]) {
+    const q = quality.legs[k];
+    $(id).textContent = q.plausible ? (k === 'row' ? paceValue(q.metric.pace) + ' /500 m' : de(q.metric.speed,1) + ' km/h') : '–';
+    $(meta).textContent = q.metric && !q.plausible ? 'Distanz oder Zeit prüfen' :
+      !q.metric ? 'Nach Ziel: tatsächliche Distanz eintragen' :
+      k === 'row' ? 'Ø ' + de(q.metric.speed,1) + ' km/h' :
+      k === 'run' ? 'Pace ' + paceValue(q.metric.pace) + ' min/km' : 'Gemessene Distanz und Zeit';
+  }
+  $('avgChange').textContent = fmt(t1Now()+t2Now());
+  $('avgChangeMeta').textContent = 'T1 ' + fmt(t1Now()) + ' · T2 ' + fmt(t2Now());
+  const dlt = quality.complete ? deltaText(sportTime(entry), plan.total) : {text:''};
+  const note = $('analysisNote');
+  note.textContent = quality.implausible ? 'Unplausible Geschwindigkeit: tatsächliche Distanz und Zeit am Gerät prüfen. Kein Planvergleich und keine Bestzeit.' :
+    dlt.text ? 'Sportzeit ' + fmt(sportTime(entry)) + ' · ' + dlt.text + ' (Plan ohne Wechsel). Gesamtzeit enthält die Wechsel.' :
+    'Planvergleich erst nach allen Zielstrecken und plausiblen Zeiten. Gesamtzeit enthält die Wechsel.';
+  note.classList.toggle('is-fast',Boolean(dlt.text) && dlt.fast);
+  note.classList.toggle('is-slow',Boolean(dlt.text) && !dlt.fast);
+  note.classList.toggle('warn',quality.implausible);
+  $('rTotalDelta').textContent = '';
+  $('rTotalDelta').classList.remove('is-fast','is-slow');
 }
 
 function updateResults(){
@@ -1062,7 +1157,7 @@ function finishLeg(k){
     status('Zielstrecke prüfen.');
     return;
   }
-  $(k + 'Dist').value = goal(k);
+  if ($(k + 'Dist').value.trim() === '') $(k + 'Dist').value = goal(k);
   stopLeg(k);
   raceStage = {row:2, bike:4, run:6}[k];
   splits.pendingFrom = k === 'run' ? null : k;
@@ -1152,19 +1247,23 @@ function snapshot(){
 
 function formatResult(e){
   const who = e.athlete ? e.athlete + ' · ' : '';
-  const planLine = Number.isFinite(e.planned) ? 'Plan                      ' + fmt(e.planned) : '';
-  const totalDelta = deltaText(e.total, e.planned);
+  const q = raceQuality(e);
+  const planLine = Number.isFinite(e.planned) ? 'Plan Sportzeit (ohne Wechsel) ' + fmt(e.planned) : '';
+  const totalDelta = comparison(e);
+  const averages = ['row','bike','run'].map(k => q.legs[k].plausible ? q.legs[k].metric : null);
   return [
     'STUDIO TRI · Indoor Triathlon',
     who + (e.mode || 'Training'),
     e.date || '',
     '',
-    'Rudern   ' + (e.rowDist || e.rowGoal || '–') + ' m    ' + fmt(e.rowTime) + (e.plannedRow ? '   Plan ' + fmt(e.plannedRow) : ''),
+    'Rudern   ' + (e.rowDist || '–') + ' m    ' + fmt(e.rowTime) + (averages[0] ? '   Ø ' + paceValue(averages[0].pace) + ' /500 m' : ''),
     'T1                         ' + fmt(e.t1 || 0),
-    'Rad      ' + (e.bikeDist || e.bikeGoal || '–') + ' km   ' + fmt(e.bikeTime) + (e.plannedBike ? '   Plan ' + fmt(e.plannedBike) : ''),
+    'Rad      ' + (e.bikeDist || '–') + ' km   ' + fmt(e.bikeTime) + (averages[1] ? '   Ø ' + de(averages[1].speed,1) + ' km/h' : ''),
     'T2                         ' + fmt(e.t2 || 0),
-    'Lauf     ' + (e.runDist || e.runGoal || '–') + ' km   ' + fmt(e.runTime) + (e.plannedRun ? '   Plan ' + fmt(e.plannedRun) : ''),
-    'Gesamt                     ' + fmt(e.total) + (totalDelta.text ? '   ' + totalDelta.text : ''),
+    'Lauf     ' + (e.runDist || '–') + ' km   ' + fmt(e.runTime) + (averages[2] ? '   Ø ' + de(averages[2].speed,1) + ' km/h · ' + paceValue(averages[2].pace) + ' min/km' : ''),
+    'Sportzeit                  ' + fmt(sportTime(e)) + (totalDelta.text ? '   ' + totalDelta.text : ''),
+    'Gesamt (inkl. Wechsel)     ' + fmt(e.total),
+    q.implausible ? 'Hinweis: Distanz und Zeit am Gerät prüfen.' : '',
     planLine
   ].filter(x => x !== '').join('\n');
 }
@@ -1250,15 +1349,17 @@ function showHistory(){
     return;
   }
   stats.hidden = false;
-  const times = a.map(e => e.total).filter(t => Number.isFinite(t) && t > 0);
+  const courseKey = e => ['row','bike','run'].map(k => Number(e[k+'Goal'])).join('/') + '/' + String(e.athlete || '').trim().toLowerCase();
+  const selectedKey = ['row','bike','run'].map(k => Number(goal(k))).join('/') + '/' + $('athlete').value.trim().toLowerCase();
+  const times = a.filter(e => raceQuality(e).complete && courseKey(e) === selectedKey).map(e => Number(e.total));
   const best = times.length ? Math.min.apply(null, times) : null;
   $('statCount').textContent = String(a.length);
   $('statBest').textContent = best == null ? '–' : fmt(best);
   $('statLast').textContent = a[0].date || '–';
   const bestByMode = {};
   a.forEach(e => {
-    const key = e.mode || 'Training';
-    if (Number.isFinite(e.total) && e.total > 0 && (bestByMode[key] == null || e.total < bestByMode[key])) bestByMode[key] = e.total;
+    const key = courseKey(e);
+    if (raceQuality(e).complete && (bestByMode[key] == null || e.total < bestByMode[key])) bestByMode[key] = e.total;
   });
   a.forEach((e, i) => {
     const div = document.createElement('div');
@@ -1268,7 +1369,7 @@ function showHistory(){
     const left = document.createElement('strong');
     left.textContent = (e.athlete ? e.athlete + ' · ' : '') + String(e.mode || 'Training') + ' · ' + String(e.date || 'Ohne Datum');
     head.append(left);
-    if (bestByMode[e.mode || 'Training'] === e.total) {
+    if (raceQuality(e).complete && bestByMode[courseKey(e)] === e.total) {
       const badge = document.createElement('span');
       badge.className = 'best';
       badge.textContent = 'Bestzeit';
@@ -1278,15 +1379,19 @@ function showHistory(){
     bar.className = 'bar';
     bar.setAttribute('aria-hidden', 'true');
     const detail = document.createElement('div');
-    const plan = Number.isFinite(e.planned) ? ' · Plan ' + fmt(e.planned) : '';
-    const dlt = deltaText(e.total, e.planned);
+    const q = raceQuality(e);
+    const dlt = comparison(e);
+    const rowAvg = q.legs.row.plausible ? ' · Ø ' + paceValue(q.legs.row.metric.pace) + ' /500 m' : '';
+    const bikeAvg = q.legs.bike.plausible ? ' · Ø ' + de(q.legs.bike.metric.speed,1) + ' km/h' : '';
+    const runAvg = q.legs.run.plausible ? ' · Ø ' + de(q.legs.run.metric.speed,1) + ' km/h · ' + paceValue(q.legs.run.metric.pace) + ' min/km' : '';
     detail.textContent = 'Gesamt ' + fmt(e.total) +
-      (dlt.text ? ' · ' + dlt.text : '') +
-      ' · Rudern ' + (e.rowDist || '–') + ' m / ' + fmt(e.rowTime) +
+      ' · Sportzeit ' + fmt(sportTime(e)) + (dlt.text ? ' · ' + dlt.text + ' (ohne Wechsel)' : '') +
+      ' · Rudern ' + (e.rowDist || '–') + ' m / ' + fmt(e.rowTime) + rowAvg +
       ' · T1 ' + fmt(e.t1 || 0) +
-      ' · Rad ' + (e.bikeDist || '–') + ' km / ' + fmt(e.bikeTime) +
+      ' · Rad ' + (e.bikeDist || '–') + ' km / ' + fmt(e.bikeTime) + bikeAvg +
       ' · T2 ' + fmt(e.t2 || 0) +
-      ' · Lauf ' + (e.runDist || '–') + ' km / ' + fmt(e.runTime) + plan;
+      ' · Lauf ' + (e.runDist || '–') + ' km / ' + fmt(e.runTime) + runAvg +
+      (q.implausible ? ' · Distanz/Zeit prüfen' : '');
     const actions = document.createElement('div');
     actions.className = 'btnrow';
     actions.style.marginTop = '8px';
@@ -1311,6 +1416,8 @@ function showHistory(){
 function toggleSound(){
   soundOn = !soundOn;
   $('soundBtn').setAttribute('aria-pressed', String(soundOn));
+  $('soundBtn').setAttribute('aria-label', soundOn ? 'Ton und Vibration an' : 'Ton und Vibration aus');
+  $('soundLabel').textContent = soundOn ? 'Ton an' : 'Ton aus';
   saveSettings();
 }
 
@@ -1418,7 +1525,7 @@ for (const id of settingIds) {
     updateCalculators();
   });
 }
-for (const id of ['rowDist','bikeDist','runDist']) $(id).addEventListener('input', saveSession);
+for (const id of ['rowDist','bikeDist','runDist']) $(id).addEventListener('input', () => { saveSession(); updateResults(); });
 
 document.addEventListener('keydown', ev => {
   if (ev.code !== 'Space' && ev.key !== ' ') return;
@@ -1437,6 +1544,8 @@ try {
   if (typeof saved?.sound === 'boolean') {
     soundOn = saved.sound;
     $('soundBtn').setAttribute('aria-pressed', String(soundOn));
+    $('soundBtn').setAttribute('aria-label', soundOn ? 'Ton und Vibration an' : 'Ton und Vibration aus');
+    $('soundLabel').textContent = soundOn ? 'Ton an' : 'Ton aus';
   }
   if (saved?.athlete) $('athlete').value = String(saved.athlete);
 } catch (_) {}
