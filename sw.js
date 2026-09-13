@@ -1,4 +1,4 @@
-const CACHE = 'studio-tri-v3';
+const CACHE = 'studio-tri-v4';
 const ASSETS = [
   './',
   './index.html',
