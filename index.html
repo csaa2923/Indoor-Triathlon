@@ -96,6 +96,12 @@ body::before{
   order:3;background:var(--surface);border:1px solid var(--line);border-radius:24px;
   padding:22px 18px 18px;text-align:center
 }
+.hud[data-sport="row"]{position:relative;isolation:isolate;overflow:hidden}
+.hud[data-sport="row"]::before{
+  content:"";position:absolute;inset:0 0 auto;height:clamp(150px,28vh,220px);z-index:-1;pointer-events:none;
+  background:linear-gradient(90deg,rgba(16,20,28,.94),rgba(16,20,28,.58) 55%,rgba(16,20,28,.25)),
+    linear-gradient(0deg,var(--surface),transparent 55%),url('assets/rowing-studio.webp') center 46%/cover no-repeat
+}
 .hud-top{display:none;align-items:center;justify-content:space-between;gap:10px;text-align:left}
 .hud-top strong{font-size:14px;color:var(--accent)}
 .hud-top button{font-size:12px;padding:8px 10px}
@@ -136,6 +142,7 @@ body.cockpit-mode .live-metrics{display:block}
   margin:0 0 16px;text-align:center
 }
 .split{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
+.split[data-k="row"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/rowing-studio.webp') 68% center/cover}
 .split span{display:block;color:var(--muted);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
 .split strong{display:block;margin-top:4px;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
 .split .mini{width:16px;height:16px;margin:0 auto 4px;display:block}
@@ -210,6 +217,13 @@ h2{margin:0 0 12px;font-size:16px;letter-spacing:-.02em}
 }
 .leg.is-on{box-shadow:inset 3px 0 0 currentColor}
 .leg[data-leg="row"].is-on{color:var(--row)}
+.leg[data-leg="row"]{position:relative;isolation:isolate;overflow:hidden}
+.leg[data-leg="row"]::before{
+  content:"";position:absolute;inset:0 0 auto;height:142px;z-index:-1;pointer-events:none;
+  background:linear-gradient(90deg,rgba(16,20,28,.94),rgba(16,20,28,.62) 54%,rgba(16,20,28,.22)),
+    linear-gradient(0deg,var(--surface),transparent 55%),url('assets/rowing-studio.webp') center 48%/cover no-repeat
+}
+.leg[data-leg="row"] .leg-head{min-height:105px;align-items:flex-end}
 .leg[data-leg="bike"].is-on{color:var(--bike)}
 .leg[data-leg="run"].is-on{color:var(--run)}
 .leg.is-done{opacity:.88}
@@ -1077,6 +1091,7 @@ function updateCalculators(){
 function updateRaceChrome(){
   const phases = ['Bereit','Rudern','Wechsel T1','Radfahren','Wechsel T2','Laufen','Ziel','Gespeichert'];
   $('hudPhase').textContent = phases[raceStage] || 'Bereit';
+  document.querySelector('.hud').dataset.sport = raceStage === 1 ? 'row' : '';
   const currentLeg = {1:'row',3:'bike',5:'run'}[raceStage];
   const labels = [
     'Rudern starten', null, 'Rad starten', null, 'Laufen starten', null,

@@ -1,4 +1,4 @@
-const CACHE = 'studio-tri-v6';
+const CACHE = 'studio-tri-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -6,7 +6,8 @@ const ASSETS = [
   './icon.svg',
   './icon-192.png',
   './icon-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './assets/rowing-studio.webp'
 ];
 
 self.addEventListener('install', event => {
