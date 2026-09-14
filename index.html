@@ -96,8 +96,8 @@ body::before{
   order:3;background:var(--surface);border:1px solid var(--line);border-radius:24px;
   padding:22px 18px 18px;text-align:center
 }
-.hud[data-sport="row"],.hud[data-sport="bike"],.hud[data-sport="run"]{position:relative;isolation:isolate;overflow:hidden}
-.hud[data-sport="row"]::before,.hud[data-sport="bike"]::before,.hud[data-sport="run"]::before{
+.hud:is([data-sport="row"],[data-sport="bike"],[data-sport="run"],[data-scene="start"],[data-scene="t1"],[data-scene="t2"]){position:relative;isolation:isolate;overflow:hidden}
+.hud:is([data-sport="row"],[data-sport="bike"],[data-sport="run"],[data-scene="start"],[data-scene="t1"],[data-scene="t2"])::before{
   content:"";position:absolute;inset:0 0 auto;height:clamp(150px,28vh,220px);z-index:-1;pointer-events:none;
   background:linear-gradient(90deg,rgba(16,20,28,.94),rgba(16,20,28,.58) 55%,rgba(16,20,28,.25)),
     linear-gradient(0deg,var(--surface),transparent 55%),url('assets/rowing-studio.webp') center 46%/cover no-repeat
@@ -109,6 +109,18 @@ body::before{
 .hud[data-sport="run"]::before{
   background:linear-gradient(90deg,rgba(16,20,28,.94),rgba(16,20,28,.58) 55%,rgba(16,20,28,.25)),
     linear-gradient(0deg,var(--surface),transparent 55%),url('assets/treadmill-studio.webp') center 46%/cover no-repeat
+}
+.hud[data-scene="start"]::before{
+  background:linear-gradient(90deg,rgba(16,20,28,.94),rgba(16,20,28,.58) 55%,rgba(16,20,28,.25)),
+    linear-gradient(0deg,var(--surface),transparent 55%),url('assets/start-studio.webp') center 46%/cover no-repeat
+}
+.hud[data-scene="t1"]::before{
+  background:linear-gradient(90deg,rgba(16,20,28,.94),rgba(16,20,28,.58) 55%,rgba(16,20,28,.25)),
+    linear-gradient(0deg,var(--surface),transparent 55%),url('assets/transition-t1-studio.webp') center 46%/cover no-repeat
+}
+.hud[data-scene="t2"]::before{
+  background:linear-gradient(90deg,rgba(16,20,28,.94),rgba(16,20,28,.58) 55%,rgba(16,20,28,.25)),
+    linear-gradient(0deg,var(--surface),transparent 55%),url('assets/transition-t2-studio.webp') center 46%/cover no-repeat
 }
 .hud-top{display:none;align-items:center;justify-content:space-between;gap:10px;text-align:left}
 .hud-top strong{font-size:14px;color:var(--accent)}
@@ -153,6 +165,8 @@ body.cockpit-mode .live-metrics{display:block}
 .split[data-k="row"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/rowing-studio.webp') 68% center/cover}
 .split[data-k="bike"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/ergometer-studio.webp') 68% center/cover}
 .split[data-k="run"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/treadmill-studio.webp') 68% center/cover}
+.split[data-k="t1"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/transition-t1-studio.webp') 68% center/cover}
+.split[data-k="t2"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/transition-t2-studio.webp') 68% center/cover}
 .split span{display:block;color:var(--muted);font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
 .split strong{display:block;margin-top:4px;font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
 .split .mini{width:16px;height:16px;margin:0 auto 4px;display:block}
@@ -1117,6 +1131,7 @@ function updateRaceChrome(){
   const phases = ['Bereit','Rudern','Wechsel T1','Radfahren','Wechsel T2','Laufen','Ziel','Gespeichert'];
   $('hudPhase').textContent = phases[raceStage] || 'Bereit';
   document.querySelector('.hud').dataset.sport = raceStage === 1 ? 'row' : raceStage === 3 ? 'bike' : raceStage === 5 ? 'run' : '';
+  document.querySelector('.hud').dataset.scene = ({0:'start',2:'t1',4:'t2'})[raceStage] || '';
   const currentLeg = {1:'row',3:'bike',5:'run'}[raceStage];
   const labels = [
     'Rudern starten', null, 'Rad starten', null, 'Laufen starten', null,

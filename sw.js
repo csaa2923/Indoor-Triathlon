@@ -1,4 +1,4 @@
-const CACHE = 'studio-tri-v10';
+const CACHE = 'studio-tri-v11';
 const ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,10 @@ const ASSETS = [
   './assets/rowing-studio.webp',
   './assets/ergometer-studio.webp',
   './assets/treadmill-studio.webp',
-  './assets/finish-studio.webp'
+  './assets/finish-studio.webp',
+  './assets/start-studio.webp',
+  './assets/transition-t1-studio.webp',
+  './assets/transition-t2-studio.webp'
 ];
 
 self.addEventListener('install', event => {
