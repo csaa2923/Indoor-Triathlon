@@ -1,4 +1,4 @@
-const CACHE = 'studio-tri-v9';
+const CACHE = 'studio-tri-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -9,7 +9,8 @@ const ASSETS = [
   './apple-touch-icon.png',
   './assets/rowing-studio.webp',
   './assets/ergometer-studio.webp',
-  './assets/treadmill-studio.webp'
+  './assets/treadmill-studio.webp',
+  './assets/finish-studio.webp'
 ];
 
 self.addEventListener('install', event => {

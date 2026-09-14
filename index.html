@@ -275,6 +275,12 @@ details ol{padding-left:22px;font-size:14px;line-height:1.5;color:#d5dceb}
 details li{margin:6px 0}
 a{color:#8ee4b8}
 .athlete{margin-bottom:14px}
+.finish-hero{
+  display:none;aspect-ratio:16/9;margin-bottom:16px;border-radius:16px;overflow:hidden;
+  background:#101820 url('assets/finish-studio.webp') center/cover no-repeat;
+  border:1px solid #345f51
+}
+.board.is-final .finish-hero{display:block}
 .race-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
 .race-who{margin:4px 0 0;color:var(--muted);font-size:var(--fs-sm)}
 .race-total{text-align:right}
@@ -623,6 +629,7 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
 
   <section class="board" id="raceBoard" aria-labelledby="resultTitle">
     <div class="panel" style="margin:0">
+      <div class="finish-hero" role="img" aria-label="Ein Triathlet durchbricht das Zielband mit der Aufschrift Sieger."></div>
       <div class="race-head">
         <div>
           <p class="kicker">Zieltafel</p>
