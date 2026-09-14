@@ -173,7 +173,8 @@ body.cockpit-mode .hint{height:2.8em;overflow-y:auto}
   display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;
   margin:0 0 16px;text-align:center
 }
-.split{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
+.split{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px 4px;min-height:86px}
+.split .goal{display:block;margin-top:5px;color:var(--text);font-size:11px;font-weight:700;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .split[data-k="row"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/rowing-studio.webp') 68% center/cover}
 .split[data-k="bike"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/ergometer-studio.webp') 68% center/cover}
 .split[data-k="run"]{background:linear-gradient(90deg,rgba(17,24,38,.89),rgba(17,24,38,.66)),url('assets/treadmill-studio.webp') 68% center/cover}
@@ -488,17 +489,17 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
     <div class="splits" aria-label="Zwischenzeiten">
       <div class="split" data-k="row">
         <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 17h13"/><rect x="8" y="14.2" width="6" height="3.2" rx=".8"/><path d="M7 16L4 7"/><path d="M3.2 5.4c1.6-.8 4 .2 4.6 2.2"/></svg>
-        <span>Rudern</span><strong id="sRow">00:00:00</strong>
+        <span>Rudern</span><strong id="sRow">00:00:00</strong><small class="goal" id="sRowGoal">–</small>
       </div>
-      <div class="split" data-k="t1"><span>T1</span><strong id="sT1">00:00:00</strong></div>
+      <div class="split" data-k="t1"><span>T1</span><strong id="sT1">00:00:00</strong><small class="goal">Wechsel</small></div>
       <div class="split" data-k="bike">
         <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="16.5" r="3.2"/><circle cx="17.5" cy="16.5" r="3.2"/><path d="M6.5 16.5L11 8.5h5.2M11 8.5l5.2 8"/></svg>
-        <span>Rad</span><strong id="sBike">00:00:00</strong>
+        <span>Rad</span><strong id="sBike">00:00:00</strong><small class="goal" id="sBikeGoal">–</small>
       </div>
-      <div class="split" data-k="t2"><span>T2</span><strong id="sT2">00:00:00</strong></div>
+      <div class="split" data-k="t2"><span>T2</span><strong id="sT2">00:00:00</strong><small class="goal">Wechsel</small></div>
       <div class="split" data-k="run">
         <svg class="mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="15.2" cy="5.6" r="2"/><path d="M13.8 9.2l-3 3.2-3.2 5.2M13.8 9.2l3.2 4.6 3.4-1.4M10.8 12.4l4.6-.6-2.8 7"/></svg>
-        <span>Lauf</span><strong id="sRun">00:00:00</strong>
+        <span>Lauf</span><strong id="sRun">00:00:00</strong><small class="goal" id="sRunGoal">–</small>
       </div>
     </div>
     <div class="live-metrics" id="liveMetrics">
@@ -1320,6 +1321,9 @@ function updateResults(){
   $('sRow').textContent = fmt(current(legs.row));
   $('sBike').textContent = fmt(current(legs.bike));
   $('sRun').textContent = fmt(current(legs.run));
+  for (const [k,id] of [['row','sRowGoal'],['bike','sBikeGoal'],['run','sRunGoal']]) {
+    $(id).textContent = 'Ziel ' + distLabel(k, goal(k));
+  }
   $('sT1').textContent = fmt(t1Now());
   $('sT2').textContent = fmt(t2Now());
   $('rRow').textContent = fmt(current(legs.row));
