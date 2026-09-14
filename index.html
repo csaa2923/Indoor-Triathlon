@@ -145,6 +145,18 @@ body.cockpit-mode .hud{
 }
 body.cockpit-mode .hud-top{display:flex}
 body.cockpit-mode .live-metrics{display:block}
+body.cockpit-mode .hud{justify-content:flex-start;gap:8px}
+body.cockpit-mode .hud > *{flex-shrink:0}
+body.cockpit-mode .phase,body.cockpit-mode .clock,body.cockpit-mode .splits,
+body.cockpit-mode .live-metrics,body.cockpit-mode .status,body.cockpit-mode .hint{margin:0}
+body.cockpit-mode .live-input{height:104px}
+body.cockpit-mode .hud:is([data-scene="t1"],[data-scene="t2"]) .live-input[hidden]{
+  display:block!important;visibility:hidden;pointer-events:none
+}
+body.cockpit-mode .live-kpi{height:126px;overflow-y:auto}
+body.cockpit-mode .live-guide{height:74px;overflow-y:auto}
+body.cockpit-mode .status{height:3.2em;overflow-y:auto}
+body.cockpit-mode .hint{height:2.8em;overflow-y:auto}
 @media(max-height:690px){body.cockpit-mode .hud{justify-content:flex-start;gap:8px}}
 .kicker{font-size:var(--fs-xs);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .phase{margin:8px 0 0;font-size:var(--fs-2xl);font-weight:800;letter-spacing:-.03em}
