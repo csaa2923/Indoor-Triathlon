@@ -136,6 +136,48 @@ body::before{
 .live-kpi strong.is-fast{color:var(--ok)}
 .live-kpi strong.is-slow{color:var(--slow)}
 .live-guide{color:var(--muted);font-size:12px;line-height:1.4;margin:9px 2px 0}
+
+.legacy-live{display:none!important}
+.checkpoint-panel{
+  min-height:360px;text-align:left;display:flex;flex-direction:column;gap:10px;
+  border:1px solid rgba(46,229,157,.3);border-radius:18px;padding:12px;
+  background:linear-gradient(180deg,rgba(7,9,13,.76),rgba(16,20,28,.94))
+}
+.checkpoint-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;min-height:42px}
+.checkpoint-head span{display:block;color:var(--muted);font-size:12px;font-weight:700}
+.checkpoint-head strong{display:block;font-family:var(--mono);font-size:clamp(18px,5vw,26px);font-variant-numeric:tabular-nums}
+.checkpoint-reference{color:var(--muted);font-size:11px;text-align:right;line-height:1.35;max-width:48%}
+.checkpoint-btn{
+  width:100%;min-height:68px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);
+  font-size:clamp(20px,6vw,30px);font-weight:900
+}
+.checkpoint-btn:disabled{opacity:.5}
+.checkpoint-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.checkpoint-card{
+  min-height:88px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;
+  padding:10px;overflow:hidden
+}
+.checkpoint-card span,.checkpoint-card small{display:block;color:var(--muted);font-size:11px;line-height:1.3}
+.checkpoint-card strong{
+  display:block;font-family:var(--mono);font-size:clamp(17px,5vw,24px);
+  font-variant-numeric:tabular-nums;margin:4px 0;white-space:nowrap
+}
+.checkpoint-card small{min-height:2.6em}
+.checkpoint-card strong.is-fast{color:var(--ok)}
+.checkpoint-card strong.is-close{color:var(--bike)}
+.checkpoint-card strong.is-slow{color:var(--slow)}
+.checkpoint-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:42px}
+.checkpoint-actions button{font-size:12px;padding:9px 11px}
+body.cockpit-mode .checkpoint-panel{min-height:360px}
+body.cockpit-mode .hud:is([data-scene="t1"],[data-scene="t2"]) .checkpoint-panel[hidden]{
+  display:flex!important;visibility:hidden;pointer-events:none
+}
+@media(max-width:380px){
+  .checkpoint-panel{min-height:344px}
+  .checkpoint-card{min-height:82px;padding:8px}
+  .checkpoint-actions button{padding:8px}
+}
+
 body.cockpit-mode{overflow:hidden}
 body.cockpit-mode .hud{
   position:fixed;inset:0;z-index:40;order:initial;width:100%;height:100dvh;
@@ -504,16 +546,35 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
       </div>
     </div>
     <div class="live-metrics" id="liveMetrics">
-      <div class="live-input" id="liveInputBox" hidden>
-        <label for="liveDistance" id="liveDistLabel">Zwischenstand am Gerät</label>
-        <input id="liveDistance" type="number" inputmode="decimal" min="0" step="any" placeholder="Distanz ablesen und eingeben">
-        <small id="liveDistHint">Für eine Live-Auswertung den aktuellen Stand vom Gerät eintragen.</small>
+      <div class="checkpoint-panel" id="checkpointPanel" hidden>
+        <div class="checkpoint-head">
+          <div><span>Fortschritt</span><strong id="checkpointProgress">0 / 0</strong></div>
+          <div class="checkpoint-reference" id="checkpointReference">Noch keine Bestzeit für diese Strecke</div>
+        </div>
+        <button type="button" class="checkpoint-btn" id="checkpointButton">500 m erreicht</button>
+        <div class="checkpoint-grid">
+          <div class="checkpoint-card"><span>Letzter Abschnitt</span><strong id="checkpointSplit">–</strong><small id="checkpointSplitMeta">Noch keine Zwischenzeit</small></div>
+          <div class="checkpoint-card"><span>Ø bis hier</span><strong id="checkpointAverage">–</strong><small id="checkpointAverageMeta">Nach dem ersten Druck verfügbar</small></div>
+          <div class="checkpoint-card"><span>Zur Bestzeit</span><strong id="checkpointDelta">–</strong><small id="checkpointDeltaMeta">Vergleich am gleichen Streckenpunkt</small></div>
+          <div class="checkpoint-card"><span>Für neue Bestzeit nötig</span><strong id="checkpointRequired">–</strong><small id="checkpointRequiredMeta">Tempo für die verbleibende Strecke</small></div>
+        </div>
+        <div class="checkpoint-actions">
+          <button type="button" class="ghost" id="undoCheckpoint" disabled>Letzte Zwischenzeit zurücknehmen</button>
+          <button type="button" class="secondary" id="finishWithoutCheckpoint">Jetzt beenden</button>
+        </div>
       </div>
-      <div class="live-kpis">
-        <div class="live-kpi"><span id="liveAvgLabel">Ø am Zwischenstand</span><strong id="liveAvg">–</strong><small id="liveAvgDetail">Distanz am Gerät ablesen</small></div>
-        <div class="live-kpi"><span>Sportzeit zum Plan</span><strong id="livePlan">–</strong><small id="livePlanDetail">Ohne Wechsel · gleiche Strecke</small></div>
+      <div class="legacy-live">
+        <div class="live-input" id="liveInputBox" hidden>
+          <label for="liveDistance" id="liveDistLabel">Zwischenstand am Gerät</label>
+          <input id="liveDistance" type="number" inputmode="decimal" min="0" step="any" placeholder="Distanz ablesen und eingeben">
+          <small id="liveDistHint">Für eine Live-Auswertung den aktuellen Stand vom Gerät eintragen.</small>
+        </div>
+        <div class="live-kpis">
+          <div class="live-kpi"><span id="liveAvgLabel">Ø am Zwischenstand</span><strong id="liveAvg">–</strong><small id="liveAvgDetail">Distanz am Gerät ablesen</small></div>
+          <div class="live-kpi"><span>Sportzeit zum Plan</span><strong id="livePlan">–</strong><small id="livePlanDetail">Ohne Wechsel · gleiche Strecke</small></div>
+        </div>
+        <p class="live-guide" id="liveGuide">Nach Eingabe einer aktuellen Distanz erscheinen Ø Tempo und Planabweichung.</p>
       </div>
-      <p class="live-guide" id="liveGuide">Nach Eingabe einer aktuellen Distanz erscheinen Ø Tempo und Planabweichung.</p>
     </div>
     <div class="pulse-panel" id="watchHeartPanel" hidden>
       <div class="pulse-head"><strong>♥ Apple Watch · Puls</strong><div class="pulse-reading"><span id="heartCurrent">–</span> <small>bpm</small></div></div>
@@ -810,6 +871,7 @@ let splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
 let cockpitOpen = false;
 let displayedLiveLeg = null;
 let liveReadings = {row:null, bike:null, run:null};
+let milestones = {row:[], bike:[], run:[]};
 let heartSamples = [];
 let lastHeart = null;
 let watchState = '';
@@ -967,6 +1029,7 @@ function saveSession(){
       raceStage,
       splits,
       liveReadings,
+      milestones,
       heartSamples
     }));
   } catch (_) {
@@ -1010,6 +1073,17 @@ function restoreSession(){
           Number.isFinite(reading.elapsed) && reading.elapsed > 0 && reading.elapsed <= current(legs[k])) {
         liveReadings[k] = {distance:reading.distance, elapsed:reading.elapsed};
       }
+    }
+    for (const k of ['row','bike','run']) {
+      const limit = current(legs[k]);
+      const step = k === 'bike' ? 1 : 0.5;
+      const restoredMarks = Array.isArray(saved.milestones?.[k]) ? saved.milestones[k] : [];
+      milestones[k] = restoredMarks.filter((mark,index,array) =>
+        Number.isFinite(mark?.distance) && mark.distance > 0 && mark.distance <= (goal(k) || Infinity) * 1.001 &&
+        Number.isFinite(mark?.elapsed) && mark.elapsed > 0 && mark.elapsed <= limit &&
+        (index === 0 || mark.distance > array[index-1].distance) &&
+        (k === 'row' || sameGoal(mark.distance,goal(k),k) || Math.abs(mark.distance / step - Math.round(mark.distance / step)) < 0.001)
+      ).map(mark => ({distance:mark.distance,elapsed:mark.elapsed}));
     }
     if (saved.splits && Number.isFinite(saved.splits.t1) && Number.isFinite(saved.splits.t2)) {
       splits = {
@@ -1158,11 +1232,11 @@ function updateRaceChrome(){
   $('raceAction').disabled = raceStage === 7;
   const hints = [
     'Beginne am Rudergerät. Die Gesamtzeit startet automatisch.',
-    'Rudern läuft. Am Ziel den großen Knopf tippen.',
+    'Bei jeweils 500 m die Zwischenzeit drücken. Der letzte Druck beendet das Rudern.',
     'Wechsel zum Ergometer. Die Gesamtzeit läuft weiter.',
-    'Radfahren läuft. Am Ziel den großen Knopf tippen.',
+    'Bei jedem Kilometer die Zwischenzeit drücken. Der letzte Druck beendet das Radfahren.',
     'Wechsel zum Laufband. Die Gesamtzeit läuft weiter.',
-    'Laufen läuft. Im Ziel den großen Knopf tippen.',
+    'Bei jeweils 500 m die Zwischenzeit drücken. Der letzte Druck beendet den Lauf.',
     'Fertig. Zieltafel prüfen, speichern oder teilen.',
     'Das Ergebnis steht im Trainingslog.'
   ];
@@ -1203,70 +1277,180 @@ function liveMetricText(k, metric){
   if (k === 'row') return paceValue(metric.pace) + ' /500 m';
   return de(metric.speed,1) + ' km/h';
 }
-function updateLiveMetrics(){
-  const k = {1:'row',3:'bike',5:'run'}[raceStage] || null;
-  const plan = planned();
-  if (displayedLiveLeg !== k) {
-    displayedLiveLeg = k;
-    $('liveDistance').value = k && liveReadings[k] ? String(liveReadings[k].distance) : '';
-  }
-  $('liveInputBox').hidden = !k;
-  if (k) {
-    $('liveDistLabel').textContent = 'Aktuelle Distanz am ' + ({row:'Rudergerät (m)',bike:'Ergometer (km)',run:'Laufband (km)'})[k];
-    $('liveDistHint').textContent = 'Ziel: ' + distLabel(k, goal(k)) + ' · nur abgelesene Zwischenstände eintragen';
-  }
-  const last = raceStage >= 4 ? 'bike' : raceStage >= 2 ? 'row' : null;
-  const shown = k || last;
-  const reading = k ? liveReadings[k] : null;
-  const dist = k ? reading?.distance : last ? measuredDistance(last, $(last+'Dist').value) : null;
-  const elapsed = k ? reading?.elapsed : last ? current(legs[last]) : null;
-  const metric = shown && dist != null && elapsed > 0 ? average(shown,dist,elapsed) : null;
-  const plausible = metric && metric.speed <= {row:30,bike:120,run:32}[shown] &&
-    dist <= goal(shown)*1.01;
-  $('liveAvgLabel').textContent = k ? 'Ø ' + names[k] + ' · Zwischenstand' : last ? 'Ø ' + names[last] + ' · letzte Disziplin' : 'Ø Tempo';
-  $('liveAvg').textContent = plausible ? liveMetricText(shown,metric) : '–';
-  $('liveAvgDetail').textContent = plausible ?
-    (shown === 'row' ? 'Ø ' + de(metric.speed,1) + ' km/h' : shown === 'run' ? 'Pace ' + paceValue(metric.pace) + ' min/km' : 'Stand bei ' + distLabel(shown,dist)) :
-    metric ? 'Distanz und Zeit am Gerät prüfen' : 'Zwischenstand am Gerät eintragen';
-
-  let actual = 0, expected = 0, comparable = true, counted = 0;
-  for (const leg of ['row','bike','run']) {
-    const finished = (leg === 'row' && raceStage >= 2) || (leg === 'bike' && raceStage >= 4) || (leg === 'run' && raceStage >= 6);
-    if (!finished) continue;
-    const quality = legQuality(leg, measuredDistance(leg,$(leg+'Dist').value), current(legs[leg]), goal(leg));
-    if (!quality.complete || !Number.isFinite(plan[leg])) { comparable = false; break; }
-    actual += current(legs[leg]);
-    expected += plan[leg];
-    counted++;
-  }
-  if (k && reading) {
-    if (!plausible || !Number.isFinite(plan[k]) || !Number.isFinite(goal(k))) comparable = false;
-    else {
-      actual += reading.elapsed;
-      expected += plan[k] * Math.min(1,reading.distance/goal(k));
-      counted++;
-    }
-  }
-  const delta = comparable && counted ? deltaText(actual,expected) : {text:'',fast:false};
-  $('livePlan').textContent = delta.text ? delta.text.replace(' unter Plan',' vor Plan').replace(' über Plan',' hinter Plan') : '–';
-  $('livePlan').classList.toggle('is-fast',Boolean(delta.text) && delta.fast);
-  $('livePlan').classList.toggle('is-slow',Boolean(delta.text) && !delta.fast);
-  $('livePlanDetail').textContent = delta.text ?
-    'Sportzeit ' + fmt(actual) + ' · Plan ' + fmt(expected) + ' · ohne Wechsel' :
-    !comparable ? 'Strecke oder Zeit prüfen' :
-    plan.total ? 'Plan Ziel ' + fmt(plan.total) + ' · ohne Wechsel' : 'Zwischenstand für Vergleich nötig';
-  $('liveGuide').textContent = k && metric && !plausible ?
-    'Distanz oder Zeit unplausibel: Wert am Gerät prüfen. Der Planvergleich bleibt ausgeblendet.' :
-    k && plausible ?
-    'Stand ' + distLabel(k,dist) + ' nach ' + fmt(elapsed) + ' · Hochrechnung Ziel ' +
-      fmt(elapsed*goal(k)/dist) + (plan[k] ? ' · Plan Ziel ' + fmt(plan[k]) : '') +
-      '. Aktualisieren, wenn das Gerät eine neue Distanz anzeigt.' :
-    k ? 'Für Ø Tempo und Planstand die aktuelle Distanz vom Gerät eintragen. Ziel-Plan: ' +
-      (plan[k] ? fmt(plan[k]) : '–') + '. Ohne Gerätekopplung erfolgt keine automatische Distanzmessung.' :
-    raceStage === 0 ? 'Distanz gewählt. Am Gerät starten und zwischendurch die angezeigte Distanz eintragen.' :
-    'Wechsel läuft. T1/T2 zählen zur Gesamtzeit, nicht zur geplanten Sportzeit.';
+function checkpointStep(k){
+  return k === 'row' ? 500 : k === 'bike' ? 1 : 0.5;
 }
+function activeLeg(){
+  return {1:'row',3:'bike',5:'run'}[raceStage] || null;
+}
+function sameGoal(a,b,k){
+  const tolerance = k === 'row' ? 1 : 0.01;
+  return Number.isFinite(Number(a)) && Number.isFinite(Number(b)) && Math.abs(Number(a)-Number(b)) <= tolerance;
+}
+function bestLegReference(k){
+  const target = goal(k);
+  if (target == null) return null;
+  const athlete = $('athlete').value.trim().toLocaleLowerCase('de');
+  const candidates = readHistory().filter(entry => {
+    if (String(entry.athlete || '').trim().toLocaleLowerCase('de') !== athlete) return false;
+    if (!sameGoal(entry[k+'Goal'],target,k)) return false;
+    const quality = legQuality(k,measuredDistance(k,entry[k+'Dist']),Number(entry[k+'Time']),target);
+    return quality.complete;
+  }).sort((a,b) => Number(a[k+'Time']) - Number(b[k+'Time']));
+  if (candidates.length) {
+    const entry = candidates[0];
+    return {time:Number(entry[k+'Time']),entry,source:'Bestzeit'};
+  }
+  const planTime = planned()[k];
+  return Number.isFinite(planTime) && planTime > 0 ? {time:planTime,entry:null,source:'Planwert'} : null;
+}
+function referenceAt(k,distance,reference){
+  if (!reference) return null;
+  const marks = reference.entry?.milestones?.[k];
+  if (Array.isArray(marks)) {
+    const exact = marks.find(mark => sameGoal(mark?.distance,distance,k));
+    if (exact && Number.isFinite(Number(exact.elapsed)) && Number(exact.elapsed) > 0) return Number(exact.elapsed);
+  }
+  const target = goal(k);
+  return target ? reference.time * distance / target : null;
+}
+function compactDelta(ms){
+  const seconds = Math.round(Math.abs(ms)/1000);
+  const amount = seconds < 60 ? seconds + ' Sek.' : Math.floor(seconds/60) + ':' + String(seconds%60).padStart(2,'0') + ' Min.';
+  if (seconds === 0) return 'genau gleich';
+  return amount + (ms < 0 ? ' voraus' : ' hinter');
+}
+function effortText(k,distance,ms){
+  if (!Number.isFinite(distance) || distance <= 0 || !Number.isFinite(ms) || ms <= 0) return '–';
+  const metric = average(k,distance,ms);
+  if (!metric) return '–';
+  if (k === 'row') return paceValue(metric.pace) + ' /500 m';
+  if (k === 'run') return paceValue(metric.pace) + ' min/km';
+  return de(metric.speed,1) + ' km/h';
+}
+function effortMeta(k,distance,ms){
+  const metric = average(k,distance,ms);
+  if (!metric) return 'Tempo nicht berechenbar';
+  if (k === 'row') return 'entspricht Ø ' + de(metric.speed,1) + ' km/h';
+  if (k === 'run') return de(metric.speed,1) + ' km/h auf der Reststrecke';
+  return 'auf der verbleibenden Strecke';
+}
+function setCheckpointTone(delta){
+  const el = $('checkpointDelta');
+  el.classList.remove('is-fast','is-close','is-slow');
+  if (!Number.isFinite(delta)) return;
+  if (delta < -3000) el.classList.add('is-fast');
+  else if (delta <= 3000) el.classList.add('is-close');
+  else el.classList.add('is-slow');
+}
+function renderCheckpointPanel(){
+  const k = activeLeg();
+  const active = Boolean(k && legs[k].running);
+  $('checkpointPanel').hidden = !active;
+  $('raceAction').hidden = active;
+  if (!active) return;
 
+  const target = goal(k);
+  const step = checkpointStep(k);
+  const marks = milestones[k];
+  const last = marks.at(-1) || null;
+  const nextDistance = Math.min(target, last ? last.distance + step : step);
+  const reference = bestLegReference(k);
+  const unitLabel = distLabel(k,nextDistance);
+  $('checkpointProgress').textContent = distLabel(k,last?.distance || 0) + ' / ' + distLabel(k,target);
+  $('checkpointReference').textContent = reference ?
+    'Vergleich: ' + reference.source + ' ' + fmt(reference.time) :
+    'Noch keine Bestzeit oder Planzeit';
+  $('checkpointButton').textContent = nextDistance >= target ?
+    unitLabel + ' · ' + shortNames[k] + ' fertig' :
+    unitLabel + ' erreicht';
+  $('checkpointButton').disabled = !(nextDistance > (last?.distance || 0));
+  $('undoCheckpoint').disabled = !marks.length;
+
+  if (!last) {
+    $('checkpointSplit').textContent = '–';
+    $('checkpointSplitMeta').textContent = 'Erster Druck bei ' + unitLabel;
+    $('checkpointAverage').textContent = '–';
+    $('checkpointAverageMeta').textContent = 'Nach dem ersten Druck verfügbar';
+    $('checkpointDelta').textContent = '–';
+    $('checkpointDeltaMeta').textContent = reference ? 'Ziel bis ' + unitLabel + ': ' + fmt(referenceAt(k,nextDistance,reference)) : 'Keine Vergleichszeit';
+    setCheckpointTone(NaN);
+    const beatTime = reference ? reference.time - 1000 : null;
+    $('checkpointRequired').textContent = reference ? effortText(k,target,beatTime) : '–';
+    $('checkpointRequiredMeta').textContent = reference ? 'Starttempo für eine neue Bestzeit' : 'Zuerst eine Einheit speichern';
+    return;
+  }
+
+  const previous = marks.length > 1 ? marks[marks.length-2] : null;
+  const sectionDistance = last.distance - (previous?.distance || 0);
+  const sectionTime = last.elapsed - (previous?.elapsed || 0);
+  $('checkpointSplit').textContent = fmt(sectionTime);
+  $('checkpointSplitMeta').textContent = distLabel(k,sectionDistance) + ' · kumuliert ' + fmt(last.elapsed);
+  $('checkpointAverage').textContent = effortText(k,last.distance,last.elapsed);
+  $('checkpointAverageMeta').textContent = effortMeta(k,last.distance,last.elapsed);
+
+  const referenceNow = referenceAt(k,last.distance,reference);
+  const delta = referenceNow == null ? NaN : last.elapsed - referenceNow;
+  $('checkpointDelta').textContent = Number.isFinite(delta) ? compactDelta(delta) : '–';
+  $('checkpointDeltaMeta').textContent = referenceNow == null ? 'Keine Vergleichszeit' :
+    reference.source + ' bis hier ' + fmt(referenceNow);
+  setCheckpointTone(delta);
+
+  const remainingDistance = Math.max(0,target-last.distance);
+  const remainingTime = reference ? reference.time - 1000 - last.elapsed : null;
+  if (!reference) {
+    $('checkpointRequired').textContent = '–';
+    $('checkpointRequiredMeta').textContent = 'Zuerst eine vollständige Einheit speichern';
+  } else if (remainingDistance <= 0) {
+    $('checkpointRequired').textContent = 'Ziel erreicht';
+    $('checkpointRequiredMeta').textContent = compactDelta(last.elapsed-reference.time);
+  } else if (remainingTime <= 0) {
+    $('checkpointRequired').textContent = 'Nicht mehr erreichbar';
+    $('checkpointRequiredMeta').textContent = reference.source + ' bereits überschritten';
+  } else {
+    $('checkpointRequired').textContent = effortText(k,remainingDistance,remainingTime);
+    $('checkpointRequiredMeta').textContent = effortMeta(k,remainingDistance,remainingTime);
+  }
+}
+function recordMilestone(){
+  const k = activeLeg();
+  if (!k || !legs[k].running) return;
+  const target = goal(k);
+  const marks = milestones[k];
+  const step = checkpointStep(k);
+  const previousDistance = marks.at(-1)?.distance || 0;
+  const distance = Math.min(target, previousDistance + step);
+  if (!(distance > previousDistance)) return;
+  const elapsed = current(legs[k]);
+  marks.push({distance,elapsed});
+  liveReadings[k] = {distance,elapsed};
+  $(k+'Dist').value = distance;
+  saveSession();
+  if (distance >= target) finishLeg(k);
+  else {
+    cue();
+    status(distLabel(k,distance) + ' erfasst');
+    updateResults();
+  }
+}
+function undoMilestone(){
+  const k = activeLeg();
+  if (!k || !milestones[k].length) return;
+  milestones[k].pop();
+  const last = milestones[k].at(-1) || null;
+  liveReadings[k] = last ? {distance:last.distance,elapsed:last.elapsed} : null;
+  $(k+'Dist').value = last ? last.distance : '';
+  status('Letzte Zwischenzeit zurückgenommen');
+  saveSession();
+  updateResults();
+}
+function finishActiveLeg(){
+  const k = activeLeg();
+  if (k && legs[k].running) finishLeg(k);
+}
+function updateLiveMetrics(){
+  renderCheckpointPanel();
+}
 function fillRaceMeta(){
   const plan = planned();
   const entry = liveEntry();
@@ -1397,6 +1581,7 @@ function clearSession(){
   raceStage = 0;
   splits = {t1:0, t2:0, pendingFrom:null, pendingAt:null};
   liveReadings = {row:null, bike:null, run:null};
+  milestones = {row:[], bike:[], run:[]};
   heartSamples = [];
   lastHeart = null;
   displayedLiveLeg = null;
@@ -1456,7 +1641,14 @@ function finishLeg(k){
     status('Zielstrecke prüfen.');
     return;
   }
-  if ($(k + 'Dist').value.trim() === '') $(k + 'Dist').value = goal(k);
+  const finishDistance = goal(k);
+  const finishElapsed = current(legs[k]);
+  const lastMark = milestones[k].at(-1);
+  if (!lastMark || !sameGoal(lastMark.distance,finishDistance,k)) {
+    milestones[k].push({distance:finishDistance,elapsed:finishElapsed});
+    liveReadings[k] = {distance:finishDistance,elapsed:finishElapsed};
+  }
+  $(k + 'Dist').value = finishDistance;
   stopLeg(k);
   raceStage = {row:2, bike:4, run:6}[k];
   splits.pendingFrom = k === 'run' ? null : k;
@@ -1545,6 +1737,7 @@ function snapshot(){
     plannedRow: p.row,
     plannedBike: p.bike,
     plannedRun: p.run,
+    milestones: Object.fromEntries(Object.entries(milestones).map(([k,marks]) => [k, marks.map(mark => ({...mark}))])),
     heartRate: heartSummary()
   };
 }
@@ -1810,6 +2003,9 @@ document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click
 document.querySelectorAll('[data-stop]').forEach(b => b.addEventListener('click', () => stopLeg(b.dataset.stop, true)));
 document.querySelectorAll('[data-finish]').forEach(b => b.addEventListener('click', () => finishLeg(b.dataset.finish)));
 $('raceAction').addEventListener('click', advanceRace);
+$('checkpointButton').addEventListener('click', recordMilestone);
+$('undoCheckpoint').addEventListener('click', undoMilestone);
+$('finishWithoutCheckpoint').addEventListener('click', finishActiveLeg);
 $('editRoute').addEventListener('click', () => {
   cockpitOpen = false;
   updateResults();
