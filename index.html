@@ -180,6 +180,39 @@ body.cockpit-mode .hud:is([data-scene="t1"],[data-scene="t2"]) .checkpoint-panel
   .checkpoint-actions button{padding:8px}
 }
 
+
+.start-lineup{display:none}
+.hud[data-scene="start"] .start-lineup{
+  display:block;width:100%;margin:10px 0 0;border:1px solid rgba(91,157,255,.28);
+  border-radius:18px;padding:10px;background:rgba(7,9,13,.7)
+}
+.start-lineup-title{
+  margin:0 0 8px;color:var(--muted);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;font-weight:800;text-align:left
+}
+.start-lineup-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.start-athlete{
+  min-height:clamp(112px,17vh,168px);border-radius:12px;overflow:hidden;
+  background-position:center;background-size:cover;position:relative
+}
+.start-athlete::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(7,9,13,.04),rgba(7,9,13,.68))
+}
+.start-athlete[data-sport="row"]{background-image:url('assets/rowing-studio.webp');background-position:62% center}
+.start-athlete[data-sport="bike"]{background-image:url('assets/ergometer-studio.webp');background-position:60% center}
+.start-athlete[data-sport="run"]{background-image:url('assets/treadmill-studio.webp');background-position:58% center}
+.start-athlete span{
+  position:absolute;z-index:1;left:9px;bottom:8px;color:#fff;font-size:10px;
+  letter-spacing:.1em;font-weight:800;text-shadow:0 1px 8px #000
+}
+@media(max-width:380px){
+  .start-lineup{padding:8px}
+  .start-lineup-grid{gap:5px}
+  .start-athlete{min-height:100px}
+  .start-athlete span{font-size:9px;left:7px;bottom:6px}
+}
+
 body.cockpit-mode{overflow:hidden}
 body.cockpit-mode .hud{
   position:fixed;inset:0;z-index:40;order:initial;width:100%;height:100dvh;
@@ -591,6 +624,14 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
     </div>
     <p class="status" id="phaseStatus" role="status">Bereit. Distanz wählen, dann starten. Die Gesamtzeit läuft auch in den Wechseln.</p>
     <p class="hint" id="raceHint">Leertaste startet oder beendet die aktuelle Disziplin, wenn kein Feld fokussiert ist.</p>
+    <div class="start-lineup" aria-label="Triathleten am Start">
+      <p class="start-lineup-title">Triathleten am Start</p>
+      <div class="start-lineup-grid">
+        <div class="start-athlete" data-sport="row" role="img" aria-label="Athlet am Rudergerät"><span>RUDERN</span></div>
+        <div class="start-athlete" data-sport="bike" role="img" aria-label="Athlet am Fahrradergometer"><span>RAD</span></div>
+        <div class="start-athlete" data-sport="run" role="img" aria-label="Athlet am Laufband"><span>LAUF</span></div>
+      </div>
+    </div>
   </section>
 
   <nav class="stepper" aria-label="Wettkampfphasen">
