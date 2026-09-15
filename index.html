@@ -166,7 +166,9 @@ body::before{
 .checkpoint-card strong.is-fast{color:var(--ok)}
 .checkpoint-card strong.is-close{color:var(--bike)}
 .checkpoint-card strong.is-slow{color:var(--slow)}
-.checkpoint-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:42px}
+.checkpoint-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-height:104px}
+.checkpoint-actions #finishWithoutCheckpoint{order:0;width:100%;min-height:62px;border-radius:16px;background:var(--danger);color:var(--danger-ink);font-size:clamp(20px,6vw,28px);font-weight:900}
+.checkpoint-actions #undoCheckpoint{order:1;align-self:center}
 .checkpoint-actions button{font-size:12px;padding:9px 11px}
 body.cockpit-mode .checkpoint-panel{min-height:360px}
 body.cockpit-mode .hud:is([data-scene="t1"],[data-scene="t2"]) .checkpoint-panel[hidden]{
@@ -560,7 +562,7 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         </div>
         <div class="checkpoint-actions">
           <button type="button" class="ghost" id="undoCheckpoint" disabled>Letzte Zwischenzeit zurücknehmen</button>
-          <button type="button" class="secondary" id="finishWithoutCheckpoint">Jetzt beenden</button>
+          <button type="button" class="secondary" id="finishWithoutCheckpoint">Rudern fertig</button>
         </div>
       </div>
       <div class="legacy-live">
@@ -1351,6 +1353,7 @@ function renderCheckpointPanel(){
   if (!active) return;
 
   const target = goal(k);
+  $('finishWithoutCheckpoint').textContent = names[k] + ' fertig';
   const step = checkpointStep(k);
   const marks = milestones[k];
   const last = marks.at(-1) || null;
