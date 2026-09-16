@@ -551,11 +551,19 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
         Wettkampf<small>2.000 m · 40 km · 10 km</small>
       </button>
+      <button type="button" class="preset" data-preset="volk" aria-label="Sprintdistanz Volkstriathlon: 750 Meter Rudern, 20 Kilometer Rad, 5 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Sprintdistanz<small>Volkstriathlon · 750 m · 20 km · 5 km</small>
+      </button>
+      <button type="button" class="preset" data-preset="olympic" aria-label="Kurzdistanz Olympische Distanz: 1500 Meter Rudern, 40 Kilometer Rad, 10 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Kurzdistanz<small>Olympische Distanz · 1.500 m · 40 km · 10 km</small>
+      </button>
     </div>
     <div class="summary" id="planSummary"></div>
     <aside class="format-note">
       <strong>Indoor-Format</strong>
-      Rudern ersetzt das Schwimmen. Offizielle World-Triathlon-Schwimmdistanzen gelten hier nicht. Sprint- und Wettkampf-Rad/Lauf folgen den offiziellen Strecken. Werte sind in den Disziplinen änderbar.
+      Rudern ersetzt das Schwimmen. Bei Sprintdistanz und Kurzdistanz werden 750 m beziehungsweise 1.500 m Rudern als Indoor-Ersatz verwendet; Rad und Lauf entsprechen den üblichen Strecken. Alle Werte bleiben in den Disziplinen änderbar.
     </aside>
   </section>
 
@@ -900,7 +908,9 @@ const presets = {
   studio:{label:'Studio-Start', row:2000, bike:10, run:5},
   beginner:{label:'Einsteiger', row:1000, bike:5, run:2.5},
   sprint:{label:'Sprint', row:2000, bike:20, run:5},
-  competition:{label:'Wettkampf', row:2000, bike:40, run:10}
+  competition:{label:'Wettkampf', row:2000, bike:40, run:10},
+  volk:{label:'Sprintdistanz · Volkstriathlon', row:750, bike:20, run:5},
+  olympic:{label:'Kurzdistanz · Olympische Distanz', row:1500, bike:40, run:10}
 };
 const settingIds = ['rowGoal','bikeGoal','runGoal','paceMin','paceSec','bikeSpeed','bikeWish','runSpeed','runWish','incline'];
 const settingKey = 'indoorTriathlonSettingsV2';
