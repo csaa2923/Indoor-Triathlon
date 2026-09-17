@@ -441,6 +441,12 @@ a{color:#8ee4b8}
 .history-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
 .history-chart-head h3{margin:0;font-size:var(--fs-md)}
 .history-chart-head p{margin:3px 0 0;color:var(--muted);font-size:var(--fs-xs);line-height:1.35}
+.chart-course-picker{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px;margin:0 0 10px}
+.chart-course-picker label{color:var(--muted);font-size:var(--fs-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.chart-course-picker select{
+  width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:11px;
+  background:var(--surface-2);color:var(--text);font:700 var(--fs-sm) var(--font);padding:8px 34px 8px 10px
+}
 .chart-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
 .chart-tab{
   flex:0 0 auto;padding:8px 10px;border-radius:10px;background:var(--surface-2);
@@ -874,6 +880,10 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
             <p id="historyChartCourse">Gewählte Strecke · gespeicherte Ergebnisse</p>
           </div>
         </div>
+        <div class="chart-course-picker">
+          <label for="historyCourseSelect">Strecke</label>
+          <select id="historyCourseSelect" aria-label="Strecke für die Verlaufsgrafik"></select>
+        </div>
         <div class="chart-tabs" role="group" aria-label="Wert für die Verlaufsgrafik">
           <button type="button" class="chart-tab" data-chart-metric="total" aria-pressed="true">Gesamt</button>
           <button type="button" class="chart-tab" data-chart-metric="sport" aria-pressed="false">Sportzeit</button>
@@ -985,6 +995,7 @@ let wakeLock = null;
 let restored = false;
 let installPrompt = null;
 let historyMetric = 'total';
+let historyCourseKey = '';
 
 const names = {row:'Rudern', bike:'Radfahren', run:'Laufen'};
 const shortNames = {row:'Rudern', bike:'Rad', run:'Lauf'};
@@ -1944,6 +1955,63 @@ function emptyLog(){
   return box;
 }
 
+function historyCourseKeyFor(entry){
+  return ['row','bike','run'].map(k => {
+    const value = Number(entry[k+'Goal']);
+    return Number.isFinite(value) ? String(value) : '';
+  }).join('/');
+}
+
+function currentHistoryCourseKey(){
+  return ['row','bike','run'].map(k => {
+    const value = goal(k);
+    return Number.isFinite(value) ? String(value) : '';
+  }).join('/');
+}
+
+function historyCourseFromKey(key){
+  const values = String(key || '').split('/').map(Number);
+  return values.length === 3 && values.every(Number.isFinite)
+    ? {row:values[0],bike:values[1],run:values[2]} : null;
+}
+
+function historyCourseLabel(course){
+  if (!course) return 'Strecke nicht verfügbar';
+  const preset = Object.values(presets).find(p =>
+    sameGoal(p.row,course.row,'row') && sameGoal(p.bike,course.bike,'bike') && sameGoal(p.run,course.run,'run'));
+  const distances = distLabel('row',course.row)+' · '+distLabel('bike',course.bike)+' · '+distLabel('run',course.run);
+  return (preset ? preset.label+' · ' : '') + distances;
+}
+
+function syncHistoryCourseOptions(entries, athlete){
+  const select = $('historyCourseSelect');
+  const courses = new Map();
+  entries.forEach(entry => {
+    if (String(entry.athlete || '').trim().toLocaleLowerCase('de') !== athlete || !raceQuality(entry).complete) return;
+    const key = historyCourseKeyFor(entry);
+    const course = historyCourseFromKey(key);
+    if (!course) return;
+    const item = courses.get(key) || {course,count:0};
+    item.count += 1;
+    courses.set(key,item);
+  });
+  const currentKey = currentHistoryCourseKey();
+  const currentCourse = historyCourseFromKey(currentKey);
+  if (currentCourse && !courses.has(currentKey)) courses.set(currentKey,{course:currentCourse,count:0});
+  if (!historyCourseKey || !courses.has(historyCourseKey)) {
+    historyCourseKey = courses.has(currentKey) ? currentKey : (courses.keys().next().value || currentKey);
+  }
+  select.replaceChildren();
+  courses.forEach((item,key) => {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = historyCourseLabel(item.course) + (item.count ? ' · '+item.count+' '+(item.count===1?'Einheit':'Einheiten') : ' · noch ohne Ergebnis');
+    option.selected = key === historyCourseKey;
+    select.append(option);
+  });
+  return historyCourseFromKey(historyCourseKey);
+}
+
 function historyMetricValue(entry, metric){
   if (metric === 'total') return Number(entry.total);
   if (metric === 'sport') return sportTime(entry);
@@ -1969,10 +2037,10 @@ function renderHistoryChart(entries){
   if (!entries.length) return;
 
   const athlete = $('athlete').value.trim().toLocaleLowerCase('de');
-  const target = {row:goal('row'), bike:goal('bike'), run:goal('run')};
+  const target = syncHistoryCourseOptions(entries,athlete);
   const comparable = entries.filter(entry => {
     if (String(entry.athlete || '').trim().toLocaleLowerCase('de') !== athlete) return false;
-    if (!['row','bike','run'].every(k => sameGoal(entry[k+'Goal'],target[k],k))) return false;
+    if (historyCourseKeyFor(entry) !== historyCourseKey) return false;
     return raceQuality(entry).complete;
   }).reverse().map((entry,index) => ({
     entry,
@@ -1982,10 +2050,7 @@ function renderHistoryChart(entries){
 
   document.querySelectorAll('[data-chart-metric]').forEach(button =>
     button.setAttribute('aria-pressed', String(button.dataset.chartMetric === historyMetric)));
-  $('historyChartCourse').textContent =
-    (presets[selectedPreset]?.label || 'Individuell') + ' · ' +
-    distLabel('row',target.row) + ' Rudern · ' + distLabel('bike',target.bike) + ' Rad · ' +
-    distLabel('run',target.run) + ' Lauf';
+  $('historyChartCourse').textContent = historyCourseLabel(target);
   $('historyChartNote').textContent = 'Kürzere Zeit ist besser. ' +
     (athlete ? 'Gefiltert für ' + $('athlete').value.trim() + '.' : 'Gefiltert für Einträge ohne Namen.') +
     ' Es zählen nur vollständige Ergebnisse derselben Strecke.';
@@ -2076,8 +2141,8 @@ function showHistory(){
   }
   stats.hidden = false;
   renderHistoryChart(a);
-  const courseKey = e => ['row','bike','run'].map(k => Number(e[k+'Goal'])).join('/') + '/' + String(e.athlete || '').trim().toLowerCase();
-  const selectedKey = ['row','bike','run'].map(k => Number(goal(k))).join('/') + '/' + $('athlete').value.trim().toLowerCase();
+  const courseKey = e => historyCourseKeyFor(e) + '/' + String(e.athlete || '').trim().toLowerCase();
+  const selectedKey = (historyCourseKey || currentHistoryCourseKey()) + '/' + $('athlete').value.trim().toLowerCase();
   const times = a.filter(e => raceQuality(e).complete && courseKey(e) === selectedKey).map(e => Number(e.total));
   const best = times.length ? Math.min.apply(null, times) : null;
   $('statCount').textContent = String(a.length);
@@ -2255,6 +2320,10 @@ document.querySelectorAll('[data-chart-metric]').forEach(button => button.addEve
   historyMetric = button.dataset.chartMetric;
   renderHistoryChart(readHistory());
 }));
+$('historyCourseSelect').addEventListener('change', event => {
+  historyCourseKey = event.target.value;
+  showHistory();
+});
 $('historyBtn').addEventListener('click', () => {
   showHistory();
   $('log').scrollIntoView({behavior: reduceMotion() ? 'auto' : 'smooth', block:'start'});
