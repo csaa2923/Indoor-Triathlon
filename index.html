@@ -434,6 +434,36 @@ a{color:#8ee4b8}
 }
 .stat span{display:block;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
 .stat strong{display:block;margin-top:4px;font-size:var(--fs-md)}
+.history-chart{
+  margin:0 0 16px;padding:14px;border:1px solid var(--line);border-radius:16px;
+  background:linear-gradient(180deg,rgba(46,229,157,.055),rgba(13,16,22,.94))
+}
+.history-chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.history-chart-head h3{margin:0;font-size:var(--fs-md)}
+.history-chart-head p{margin:3px 0 0;color:var(--muted);font-size:var(--fs-xs);line-height:1.35}
+.chart-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
+.chart-tab{
+  flex:0 0 auto;padding:8px 10px;border-radius:10px;background:var(--surface-2);
+  border:1px solid var(--line);font-size:var(--fs-xs);color:var(--muted)
+}
+.chart-tab[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:#10261c}
+.chart-summary{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:2px 0 6px}
+.chart-summary strong{font-family:var(--mono);font-size:var(--fs-lg);font-variant-numeric:tabular-nums}
+.chart-summary span{color:var(--muted);font-size:var(--fs-xs);text-align:right}
+.chart-summary .is-fast{color:var(--ok)}
+.chart-summary .is-slow{color:var(--slow)}
+.chart-canvas{
+  display:block;width:100%;height:auto;min-height:190px;border-radius:12px;
+  background:rgba(7,9,13,.72);overflow:visible
+}
+.chart-grid{stroke:var(--line);stroke-width:1}
+.chart-axis-label{fill:var(--muted);font:10px var(--font)}
+.chart-line{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.chart-area{fill:url(#historyArea)}
+.chart-point{fill:var(--bg);stroke:var(--accent);stroke-width:3}
+.chart-point.is-best{fill:var(--accent)}
+.chart-empty{padding:28px 12px;text-align:center;color:var(--muted);font-size:var(--fs-sm)}
+.chart-note{margin:8px 0 0;color:var(--muted);font-size:var(--fs-xs);line-height:1.4}
 .history-entry{border-bottom:1px solid var(--line);padding:14px 0;line-height:1.5;color:var(--text)}
 .history-entry:last-child{border:0}
 .history-entry .meta{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
@@ -837,6 +867,28 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <div class="stat"><span>Bestzeit · gewählte Strecke</span><strong id="statBest">–</strong></div>
         <div class="stat"><span>Zuletzt</span><strong id="statLast">–</strong></div>
       </div>
+      <section class="history-chart" id="historyChart" aria-labelledby="historyChartTitle" hidden>
+        <div class="history-chart-head">
+          <div>
+            <h3 id="historyChartTitle">Leistungsverlauf</h3>
+            <p id="historyChartCourse">Gewählte Strecke · gespeicherte Ergebnisse</p>
+          </div>
+        </div>
+        <div class="chart-tabs" role="group" aria-label="Wert für die Verlaufsgrafik">
+          <button type="button" class="chart-tab" data-chart-metric="total" aria-pressed="true">Gesamt</button>
+          <button type="button" class="chart-tab" data-chart-metric="sport" aria-pressed="false">Sportzeit</button>
+          <button type="button" class="chart-tab" data-chart-metric="row" aria-pressed="false">Rudern</button>
+          <button type="button" class="chart-tab" data-chart-metric="bike" aria-pressed="false">Rad</button>
+          <button type="button" class="chart-tab" data-chart-metric="run" aria-pressed="false">Lauf</button>
+        </div>
+        <div class="chart-summary">
+          <strong id="historyChartLatest">–</strong>
+          <span id="historyChartTrend">–</span>
+        </div>
+        <svg class="chart-canvas" id="historyChartSvg" viewBox="0 0 620 230" role="img" aria-label="Zeitverlauf der gespeicherten Ergebnisse"></svg>
+        <div class="chart-empty" id="historyChartEmpty" hidden>Noch keine vollständige Einheit für diese Strecke gespeichert.</div>
+        <p class="chart-note" id="historyChartNote">Kürzere Zeit ist besser. Berücksichtigt werden vollständige Ergebnisse derselben Strecke und desselben Namens.</p>
+      </section>
       <div id="historyBox"></div>
     </div>
   </section>
@@ -932,6 +984,7 @@ let soundOn = true;
 let wakeLock = null;
 let restored = false;
 let installPrompt = null;
+let historyMetric = 'total';
 
 const names = {row:'Rudern', bike:'Radfahren', run:'Laufen'};
 const shortNames = {row:'Rudern', bike:'Rad', run:'Lauf'};
@@ -1891,6 +1944,125 @@ function emptyLog(){
   return box;
 }
 
+function historyMetricValue(entry, metric){
+  if (metric === 'total') return Number(entry.total);
+  if (metric === 'sport') return sportTime(entry);
+  return Number(entry[metric + 'Time']);
+}
+
+function historyMetricLabel(metric){
+  return {total:'Gesamtzeit', sport:'Sportzeit', row:'Rudern', bike:'Radfahren', run:'Laufen'}[metric] || 'Zeit';
+}
+
+function chartDateLabel(entry, fallback){
+  const raw = String(entry.date || '').trim();
+  const date = raw.split(',')[0].trim();
+  return date || ('Einheit ' + fallback);
+}
+
+function renderHistoryChart(entries){
+  const wrap = $('historyChart');
+  const svg = $('historyChartSvg');
+  const empty = $('historyChartEmpty');
+  if (!wrap || !svg) return;
+  wrap.hidden = entries.length === 0;
+  if (!entries.length) return;
+
+  const athlete = $('athlete').value.trim().toLocaleLowerCase('de');
+  const target = {row:goal('row'), bike:goal('bike'), run:goal('run')};
+  const comparable = entries.filter(entry => {
+    if (String(entry.athlete || '').trim().toLocaleLowerCase('de') !== athlete) return false;
+    if (!['row','bike','run'].every(k => sameGoal(entry[k+'Goal'],target[k],k))) return false;
+    return raceQuality(entry).complete;
+  }).reverse().map((entry,index) => ({
+    entry,
+    label:chartDateLabel(entry,index+1),
+    value:historyMetricValue(entry,historyMetric)
+  })).filter(point => Number.isFinite(point.value) && point.value > 0);
+
+  document.querySelectorAll('[data-chart-metric]').forEach(button =>
+    button.setAttribute('aria-pressed', String(button.dataset.chartMetric === historyMetric)));
+  $('historyChartCourse').textContent =
+    (presets[selectedPreset]?.label || 'Individuell') + ' · ' +
+    distLabel('row',target.row) + ' Rudern · ' + distLabel('bike',target.bike) + ' Rad · ' +
+    distLabel('run',target.run) + ' Lauf';
+  $('historyChartNote').textContent = 'Kürzere Zeit ist besser. ' +
+    (athlete ? 'Gefiltert für ' + $('athlete').value.trim() + '.' : 'Gefiltert für Einträge ohne Namen.') +
+    ' Es zählen nur vollständige Ergebnisse derselben Strecke.';
+
+  svg.replaceChildren();
+  empty.hidden = comparable.length > 0;
+  svg.hidden = comparable.length === 0;
+  $('historyChartLatest').textContent = comparable.length ? historyMetricLabel(historyMetric) + ' · ' + fmt(comparable.at(-1).value) : '–';
+  $('historyChartTrend').className = '';
+  if (!comparable.length) {
+    $('historyChartTrend').textContent = 'Noch keine Vergleichswerte';
+    return;
+  }
+
+  const first = comparable[0].value;
+  const latest = comparable.at(-1).value;
+  const best = Math.min(...comparable.map(point => point.value));
+  const change = latest - first;
+  if (comparable.length === 1) {
+    $('historyChartTrend').textContent = 'Für einen Trend eine weitere Einheit speichern';
+  } else {
+    $('historyChartTrend').textContent =
+      (change <= 0 ? '−' : '+') + fmt(Math.abs(change)) + ' seit der ersten Einheit · Bestzeit ' + fmt(best);
+    $('historyChartTrend').className = change <= 0 ? 'is-fast' : 'is-slow';
+  }
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const make = (tag,attrs={},textValue='') => {
+    const node = document.createElementNS(NS,tag);
+    Object.entries(attrs).forEach(([key,value]) => node.setAttribute(key,String(value)));
+    if (textValue) node.textContent = textValue;
+    return node;
+  };
+  const width=620, height=230, left=58, right=18, top=18, bottom=34;
+  const plotW=width-left-right, plotH=height-top-bottom;
+  const rawMin=Math.min(...comparable.map(point => point.value));
+  const rawMax=Math.max(...comparable.map(point => point.value));
+  const spread=Math.max(rawMax-rawMin,Math.max(rawMax*.08,60000));
+  const min=Math.max(0,rawMin-spread*.18), max=rawMax+spread*.18;
+  const x=index => comparable.length === 1 ? left+plotW/2 : left+(index/(comparable.length-1))*plotW;
+  const y=value => top+((max-value)/(max-min))*plotH;
+
+  const defs=make('defs');
+  const gradient=make('linearGradient',{id:'historyArea',x1:'0',y1:'0',x2:'0',y2:'1'});
+  gradient.append(make('stop',{offset:'0%','stop-color':'#2ee59d','stop-opacity':'.28'}));
+  gradient.append(make('stop',{offset:'100%','stop-color':'#2ee59d','stop-opacity':'0'}));
+  defs.append(gradient);
+  svg.append(defs);
+
+  for (let step=0;step<=4;step++) {
+    const yy=top+(plotH/4)*step;
+    const value=max-((max-min)/4)*step;
+    svg.append(make('line',{x1:left,y1:yy,x2:width-right,y2:yy,class:'chart-grid'}));
+    svg.append(make('text',{x:left-8,y:yy+4,'text-anchor':'end',class:'chart-axis-label'},Math.round(value/60000)+' min'));
+  }
+
+  const coords=comparable.map((point,index) => [x(index),y(point.value)]);
+  if (coords.length > 1) {
+    const linePath=coords.map((point,index) => (index?'L':'M')+point[0].toFixed(1)+' '+point[1].toFixed(1)).join(' ');
+    const areaPath=linePath+' L '+coords.at(-1)[0].toFixed(1)+' '+(top+plotH)+' L '+coords[0][0].toFixed(1)+' '+(top+plotH)+' Z';
+    svg.append(make('path',{d:areaPath,class:'chart-area'}));
+    svg.append(make('path',{d:linePath,class:'chart-line'}));
+  }
+
+  comparable.forEach((point,index) => {
+    const [xx,yy]=coords[index];
+    const circle=make('circle',{cx:xx,cy:yy,r:point.value===best?6:5,class:'chart-point'+(point.value===best?' is-best':'')});
+    circle.append(make('title',{},point.label+' · '+historyMetricLabel(historyMetric)+' '+fmt(point.value)));
+    svg.append(circle);
+  });
+  svg.append(make('text',{x:left,y:height-10,'text-anchor':'start',class:'chart-axis-label'},comparable[0].label));
+  if (comparable.length > 1) {
+    svg.append(make('text',{x:width-right,y:height-10,'text-anchor':'end',class:'chart-axis-label'},comparable.at(-1).label));
+  }
+  svg.setAttribute('aria-label',historyMetricLabel(historyMetric)+' im Verlauf: '+comparable.length+' gespeicherte '+(comparable.length===1?'Einheit':'Einheiten')+'. Aktuell '+fmt(latest)+', Bestzeit '+fmt(best)+'.');
+}
+
 function showHistory(){
   const a = readHistory();
   const box = $('historyBox');
@@ -1898,10 +2070,12 @@ function showHistory(){
   box.replaceChildren();
   if (!a.length) {
     stats.hidden = true;
+    renderHistoryChart(a);
     box.append(emptyLog());
     return;
   }
   stats.hidden = false;
+  renderHistoryChart(a);
   const courseKey = e => ['row','bike','run'].map(k => Number(e[k+'Goal'])).join('/') + '/' + String(e.athlete || '').trim().toLowerCase();
   const selectedKey = ['row','bike','run'].map(k => Number(goal(k))).join('/') + '/' + $('athlete').value.trim().toLowerCase();
   const times = a.filter(e => raceQuality(e).complete && courseKey(e) === selectedKey).map(e => Number(e.total));
@@ -2077,6 +2251,10 @@ $('pauseBtn').addEventListener('click', pauseAll);
 $('resetBtn').addEventListener('click', resetAll);
 $('saveBtn').addEventListener('click', saveResult);
 $('shareBtn').addEventListener('click', shareResult);
+document.querySelectorAll('[data-chart-metric]').forEach(button => button.addEventListener('click', () => {
+  historyMetric = button.dataset.chartMetric;
+  renderHistoryChart(readHistory());
+}));
 $('historyBtn').addEventListener('click', () => {
   showHistory();
   $('log').scrollIntoView({behavior: reduceMotion() ? 'auto' : 'smooth', block:'start'});
@@ -2089,12 +2267,14 @@ $('watchStop').addEventListener('click', () => commandWatch('stop'));
 $('athlete').addEventListener('input', () => {
   saveSettings();
   fillRaceMeta();
+  renderHistoryChart(readHistory());
 });
 for (const id of settingIds) {
   $(id).addEventListener('input', () => {
     if (['rowGoal','bikeGoal','runGoal'].includes(id)) selectedPreset = 'custom';
     saveSettings();
     updateCalculators();
+    if (['rowGoal','bikeGoal','runGoal'].includes(id)) renderHistoryChart(readHistory());
   });
 }
 for (const id of ['rowDist','bikeDist','runDist']) $(id).addEventListener('input', () => { saveSession(); updateResults(); });
