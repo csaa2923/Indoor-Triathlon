@@ -1,0 +1,13 @@
+{
+  "name": "Studio Tri – Indoor Triathlon (PWA)",
+  "ports": [
+    { "name": "web", "port": 8777 }
+  ],
+  "terminals": [
+    {
+      "name": "web",
+      "command": "python3 -m http.server 8777 --bind 0.0.0.0",
+      "description": "Static file server for the Studio Tri PWA. Open http://localhost:8777/ in a browser to use the app. The app is a client-side progressive web app; there is no build step or backend."
+    }
+  ]
+}
