@@ -304,6 +304,11 @@ body.is-live .legs{order:3}
 body.is-live .plan{order:4}
 h2{margin:0 0 12px;font-size:16px;letter-spacing:-.02em}
 .presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.preset-group-title{
+  grid-column:1/-1;margin:6px 2px 0;color:var(--muted);font-size:var(--fs-xs);
+  font-weight:800;letter-spacing:.12em;text-transform:uppercase
+}
+.preset-group-title:first-child{margin-top:0}
 .preset{
   background:var(--surface-2);border:1px solid var(--line);border-radius:14px;
   text-align:left;min-height:78px;padding:12px
@@ -571,6 +576,7 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
       <input id="athlete" type="text" maxlength="60" placeholder="Name auf der Zieltafel" autocomplete="name">
     </div>
     <div class="presets">
+      <div class="preset-group-title">Studio-Distanzen</div>
       <button type="button" class="preset" data-preset="studio" aria-label="Studio-Start: 2000 Meter Rudern, 10 Kilometer Rad, 5 Kilometer Lauf">
         <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
         Studio-Start<small>2.000 m · 10 km · 5 km</small>
@@ -579,27 +585,40 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
         <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
         Einsteiger<small>1.000 m · 5 km · 2,5 km</small>
       </button>
-      <button type="button" class="preset" data-preset="sprint" aria-label="Sprint: 2000 Meter Rudern, 20 Kilometer Rad, 5 Kilometer Lauf">
+      <button type="button" class="preset" data-preset="sprint" aria-label="Studio-Sprint: 2000 Meter Rudern, 20 Kilometer Rad, 5 Kilometer Lauf">
         <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
-        Sprint<small>2.000 m · 20 km · 5 km</small>
+        Studio-Sprint<small>2.000 m · 20 km · 5 km</small>
       </button>
-      <button type="button" class="preset" data-preset="competition" aria-label="Wettkampf: 2000 Meter Rudern, 40 Kilometer Rad, 10 Kilometer Lauf">
+      <button type="button" class="preset" data-preset="competition" aria-label="Studio-Wettkampf: 2000 Meter Rudern, 40 Kilometer Rad, 10 Kilometer Lauf">
         <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
-        Wettkampf<small>2.000 m · 40 km · 10 km</small>
+        Studio-Wettkampf<small>2.000 m · 40 km · 10 km</small>
       </button>
-      <button type="button" class="preset" data-preset="volk" aria-label="Sprintdistanz Volkstriathlon: 750 Meter Rudern, 20 Kilometer Rad, 5 Kilometer Lauf">
+      <div class="preset-group-title">World Triathlon · Indoor angepasst</div>
+      <button type="button" class="preset" data-preset="super" aria-label="Super Sprint: 500 Meter Rudern, 10 Kilometer Rad, 2,5 Kilometer Lauf">
         <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
-        Sprintdistanz<small>Volkstriathlon · 750 m · 20 km · 5 km</small>
+        Super Sprint<small>500 m · 10 km · 2,5 km</small>
       </button>
-      <button type="button" class="preset" data-preset="olympic" aria-label="Kurzdistanz Olympische Distanz: 1500 Meter Rudern, 40 Kilometer Rad, 10 Kilometer Lauf">
+      <button type="button" class="preset" data-preset="volk" aria-label="Sprintdistanz: 750 Meter Rudern, 20 Kilometer Rad, 5 Kilometer Lauf">
         <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
-        Kurzdistanz<small>Olympische Distanz · 1.500 m · 40 km · 10 km</small>
+        Sprintdistanz<small>750 m · 20 km · 5 km</small>
+      </button>
+      <button type="button" class="preset" data-preset="olympic" aria-label="Standarddistanz: 1500 Meter Rudern, 40 Kilometer Rad, 10 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Standarddistanz<small>1.500 m · 40 km · 10 km</small>
+      </button>
+      <button type="button" class="preset" data-preset="middle" aria-label="Mitteldistanz: 1900 Meter Rudern, 90 Kilometer Rad, 21,1 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Mitteldistanz<small>1.900 m · 90 km · 21,1 km</small>
+      </button>
+      <button type="button" class="preset" data-preset="long" aria-label="Langdistanz: 3800 Meter Rudern, 180 Kilometer Rad, 42,2 Kilometer Lauf">
+        <span class="dots" aria-hidden="true"><b></b><b></b><b></b></span>
+        Langdistanz<small>3.800 m · 180 km · 42,2 km</small>
       </button>
     </div>
     <div class="summary" id="planSummary"></div>
     <aside class="format-note">
       <strong>Indoor-Format</strong>
-      Rudern ersetzt das Schwimmen. Bei Sprintdistanz und Kurzdistanz werden 750 m beziehungsweise 1.500 m Rudern als Indoor-Ersatz verwendet; Rad und Lauf entsprechen den üblichen Strecken. Alle Werte bleiben in den Disziplinen änderbar.
+      Rudern ersetzt das Schwimmen. Sprint- und Standarddistanz entsprechen 750 m / 20 km / 5 km beziehungsweise 1.500 m / 40 km / 10 km. Super Sprint, Mittel- und Langdistanz verwenden repräsentative Werte innerhalb der World-Triathlon-Bandbreiten. Die Schwimmstrecke wird jeweils als gleich lange Ruderstrecke übernommen. Alle Werte bleiben änderbar.
     </aside>
   </section>
 
@@ -969,10 +988,13 @@ let total = {elapsed:0, start:null, running:false};
 const presets = {
   studio:{label:'Studio-Start', row:2000, bike:10, run:5},
   beginner:{label:'Einsteiger', row:1000, bike:5, run:2.5},
-  sprint:{label:'Sprint', row:2000, bike:20, run:5},
-  competition:{label:'Wettkampf', row:2000, bike:40, run:10},
-  volk:{label:'Sprintdistanz · Volkstriathlon', row:750, bike:20, run:5},
-  olympic:{label:'Kurzdistanz · Olympische Distanz', row:1500, bike:40, run:10}
+  sprint:{label:'Studio-Sprint', row:2000, bike:20, run:5},
+  competition:{label:'Studio-Wettkampf', row:2000, bike:40, run:10},
+  super:{label:'Super Sprint · World Triathlon', row:500, bike:10, run:2.5},
+  volk:{label:'Sprintdistanz · World Triathlon', row:750, bike:20, run:5},
+  olympic:{label:'Standarddistanz · World Triathlon', row:1500, bike:40, run:10},
+  middle:{label:'Mitteldistanz · World Triathlon', row:1900, bike:90, run:21.1},
+  long:{label:'Langdistanz · World Triathlon', row:3800, bike:180, run:42.2}
 };
 const settingIds = ['rowGoal','bikeGoal','runGoal','paceMin','paceSec','bikeSpeed','bikeWish','runSpeed','runWish','incline'];
 const settingKey = 'indoorTriathlonSettingsV2';
