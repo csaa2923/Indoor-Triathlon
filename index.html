@@ -374,6 +374,10 @@ input{
   background:#0d1016;color:var(--text);font-size:16px;outline:none;font-family:inherit
 }
 input:focus{border-color:var(--accent)}
+select{
+  border:1px solid var(--line);background:#0d1016;color:var(--text);
+  border-radius:10px;padding:11px;font-size:16px;font-family:inherit
+}
 .pace-pair{display:flex;align-items:center;gap:7px}
 .pace-pair input{width:70px;text-align:center}
 .calc{margin-top:12px;padding:11px 12px;border-left:3px solid var(--accent);border-radius:10px;background:#10261c;font-size:14px;line-height:1.5;color:var(--text)}
@@ -523,6 +527,53 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
 }
+
+.mode-switch{
+  order:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px;
+  background:var(--surface);border:1px solid var(--line);border-radius:16px
+}
+.mode-switch button{min-height:50px;background:transparent;color:var(--muted);border:1px solid transparent}
+.mode-switch button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:900}
+.training-panel{order:2;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px;overflow:hidden;position:relative;isolation:isolate}
+.training-panel::before{
+  content:"";position:absolute;inset:0 0 auto;height:220px;z-index:-1;pointer-events:none;
+  background:linear-gradient(90deg,rgba(16,20,28,.95),rgba(16,20,28,.58)),linear-gradient(0deg,var(--surface),transparent 58%),url('assets/rowing-studio.webp') center/cover no-repeat
+}
+.training-panel[data-sport="bike"]::before{background:linear-gradient(90deg,rgba(16,20,28,.95),rgba(16,20,28,.58)),linear-gradient(0deg,var(--surface),transparent 58%),url('assets/ergometer-studio.webp') center/cover no-repeat}
+.training-panel[data-sport="run"]::before{background:linear-gradient(90deg,rgba(16,20,28,.95),rgba(16,20,28,.58)),linear-gradient(0deg,var(--surface),transparent 58%),url('assets/treadmill-studio.webp') center/cover no-repeat}
+.training-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-height:108px}
+.training-head h2{font-size:24px;margin-top:5px}.training-head .kicker{color:var(--accent)}
+.training-sports{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.training-sport{background:rgba(24,29,40,.9);border:1px solid var(--line);min-height:62px}
+.training-sport[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;color:var(--accent)}
+.training-config-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.training-config-grid>div{min-width:0}.training-config-grid .wide{grid-column:1/-1}
+.training-config-grid label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+.training-config-grid select,.training-config-grid input{width:100%;min-height:48px}
+.training-live{display:none;text-align:center}
+.training-live .clock{margin:4px 0 12px;color:var(--accent)}
+.training-progress{font-size:20px;font-weight:900;margin:4px 0 8px}
+.training-phase{color:var(--muted);font-size:14px;min-height:1.5em}
+.training-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.training-kpi{min-height:92px;padding:12px;text-align:left;background:rgba(24,29,40,.94);border:1px solid var(--line);border-radius:14px}
+.training-kpi span,.training-kpi small{display:block;color:var(--muted);font-size:12px;line-height:1.35}
+.training-kpi strong{display:block;font-family:var(--mono);font-size:clamp(20px,6vw,29px);margin:5px 0;font-variant-numeric:tabular-nums}
+.training-kpi strong.is-fast{color:var(--ok)}.training-kpi strong.is-slow{color:var(--slow)}
+.training-distance-live{text-align:left;margin:8px 0 12px}.training-distance-live label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+.training-distance-live input{width:100%;min-height:50px}
+.training-main-action{min-height:72px;font-size:clamp(21px,6vw,29px)}
+.training-result{margin-top:16px;padding:14px;border:1px solid rgba(46,229,157,.35);border-radius:16px;background:rgba(7,9,13,.72)}
+.training-result h3{margin:0 0 10px}.training-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.training-result-grid div{padding:10px;background:var(--surface-2);border-radius:12px}
+.training-result-grid span,.training-result-grid small{display:block;color:var(--muted);font-size:12px}
+.training-result-grid strong{display:block;font-size:18px;margin:4px 0}
+.training-log{margin-top:16px}.training-entry{padding:12px 0;border-top:1px solid var(--line);line-height:1.5;font-size:14px}
+.training-entry small{display:block;color:var(--muted)}
+body.training-active{overflow:hidden}
+body.training-active .training-panel{position:fixed;inset:0;z-index:45;width:100%;height:100dvh;border:0;border-radius:0;overflow-y:auto;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+body.training-active .training-config,body.training-active .training-head{display:none}
+body.training-active .training-live{display:block;max-width:720px;margin:0 auto}
+@media(max-width:420px){.training-config-grid{grid-template-columns:1fr}.training-config-grid .wide{grid-column:auto}.training-kpis{gap:6px}.training-kpi{padding:9px}}
 </style>
 </head>
 <body>
@@ -568,6 +619,65 @@ footer{order:8;text-align:center;color:#6d7588;font-size:12px;line-height:1.55;m
   <div class="banner warn" id="fileBanner" hidden></div>
   <div class="banner" id="restoreBanner" hidden></div>
   <div class="banner install-card" id="installCard" hidden></div>
+
+  <nav class="mode-switch" aria-label="Betriebsart">
+    <button type="button" id="competitionMode" aria-pressed="true">Wettkampf</button>
+    <button type="button" id="trainingMode" aria-pressed="false">Training</button>
+  </nav>
+
+  <section class="training-panel" id="trainingPanel" data-sport="row" hidden aria-labelledby="trainingTitle">
+    <div class="training-head">
+      <div><div class="kicker">Studio Tri · Training</div><h2 id="trainingTitle">Einzeltraining</h2></div>
+      <button type="button" class="ghost" id="trainingBack">Zum Wettkampf</button>
+    </div>
+    <div class="training-config" id="trainingConfig">
+      <div class="training-sports" role="group" aria-label="Sportart">
+        <button type="button" class="training-sport" data-training-sport="row" aria-pressed="true">Rudern</button>
+        <button type="button" class="training-sport" data-training-sport="bike" aria-pressed="false">Radfahren</button>
+        <button type="button" class="training-sport" data-training-sport="run" aria-pressed="false">Laufen</button>
+      </div>
+      <div class="training-config-grid">
+        <div><label for="trainingKind">Trainingsart</label><select id="trainingKind"><option value="single">Einzeltraining</option><option value="interval">Intervalltraining</option></select></div>
+        <div id="trainingTargetWrap"><label for="trainingTarget">Trainingsziel</label><select id="trainingTarget"><option value="distance">Distanz</option><option value="time">Dauer</option></select></div>
+        <div id="trainingDistanceWrap"><label for="trainingDistance" id="trainingDistanceLabel">Zieldistanz (m)</label><input id="trainingDistance" type="number" inputmode="decimal" min="0.1" step="0.1" value="2000"></div>
+        <div id="trainingDurationWrap" hidden><label for="trainingDuration">Dauer (Minuten)</label><input id="trainingDuration" type="number" inputmode="decimal" min="1" max="600" step="1" value="30"></div>
+        <div id="trainingRepsWrap" hidden><label for="trainingReps">Wiederholungen</label><input id="trainingReps" type="number" inputmode="numeric" min="2" max="50" step="1" value="4"></div>
+        <div id="trainingIntervalWrap" hidden><label for="trainingInterval" id="trainingIntervalLabel">Intervall (m)</label><input id="trainingInterval" type="number" inputmode="decimal" min="0.1" step="0.1" value="500"></div>
+        <div id="trainingRestWrap" hidden><label for="trainingRest">Pause (Sekunden)</label><input id="trainingRest" type="number" inputmode="numeric" min="0" max="1800" step="5" value="60"></div>
+        <div class="wide"><button type="button" class="cta" id="trainingStart">Training starten</button></div>
+      </div>
+    </div>
+    <div class="training-live" id="trainingLive">
+      <div class="kicker" id="trainingLiveKicker">Rudern · Einzeltraining</div>
+      <div class="training-progress" id="trainingProgress">Bereit</div>
+      <div class="clock" id="trainingClock">00:00:00</div>
+      <div class="training-phase" id="trainingPhase">Training läuft</div>
+      <div class="training-distance-live">
+        <label for="trainingDistanceNow" id="trainingDistanceNowLabel">Aktuelle Distanz am Gerät (m)</label>
+        <input id="trainingDistanceNow" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Zwischenstand eingeben">
+      </div>
+      <div class="training-kpis">
+        <div class="training-kpi"><span>Ø aktuell</span><strong id="trainingAverage">–</strong><small id="trainingAverageMeta">Distanz eingeben</small></div>
+        <div class="training-kpi"><span>Persönliche Bestzeit</span><strong id="trainingBest">–</strong><small id="trainingBestMeta">Gleiche Einheit</small></div>
+        <div class="training-kpi"><span>Zur Bestzeit</span><strong id="trainingDelta">–</strong><small id="trainingDeltaMeta">Wird live berechnet</small></div>
+        <div class="training-kpi"><span id="trainingSplitLabel">Letztes Intervall</span><strong id="trainingSplit">–</strong><small id="trainingSplitMeta">Noch kein Abschnitt</small></div>
+      </div>
+      <button type="button" class="cta training-main-action" id="trainingAction">Training beenden</button>
+      <div class="btnrow" style="margin-top:10px"><button type="button" class="secondary" id="trainingPause">Pause</button><button type="button" class="danger" id="trainingCancel">Abbrechen</button></div>
+    </div>
+    <div class="training-result" id="trainingResult" hidden>
+      <h3>Trainingsauswertung</h3>
+      <div class="training-result-grid">
+        <div><span>Gesamtzeit</span><strong id="trainingResultTime">–</strong><small id="trainingResultTimeMeta">inklusive Intervallpausen</small></div>
+        <div><span>Aktive Zeit</span><strong id="trainingResultWork">–</strong><small>ohne Intervallpausen</small></div>
+        <div><span>Distanz</span><strong id="trainingResultDistance">–</strong><small id="trainingResultDistanceMeta">am Gerät</small></div>
+        <div><span>Durchschnitt</span><strong id="trainingResultAverage">–</strong><small id="trainingResultAverageMeta">Tempo</small></div>
+      </div>
+      <p class="summary" id="trainingResultComparison"></p>
+      <div class="btnrow"><button type="button" class="cta" id="trainingSave" style="width:auto">Training speichern</button><button type="button" class="secondary" id="trainingNew">Neues Training</button></div>
+    </div>
+    <div class="training-log" id="trainingLog"><h2>Trainingsprotokoll</h2><div id="trainingLogEntries"></div></div>
+  </section>
 
   <section class="plan" id="planBox" aria-labelledby="planTitle">
     <h2 id="planTitle">Strecke</h2>
@@ -1018,6 +1128,10 @@ let restored = false;
 let installPrompt = null;
 let historyMetric = 'total';
 let historyCourseKey = '';
+let appMode = 'competition';
+let trainingSession = null;
+const trainingHistoryKey = 'indoorTriathlonTrainingHistoryV1';
+const appModeKey = 'indoorTriathlonAppModeV1';
 
 const names = {row:'Rudern', bike:'Radfahren', run:'Laufen'};
 const shortNames = {row:'Rudern', bike:'Rad', run:'Lauf'};
@@ -1149,7 +1263,7 @@ function cue(){
 async function syncWakeLock(){
   try {
     if (!('wakeLock' in navigator)) return;
-    if (total.running) {
+    if (total.running || trainingSession?.running) {
       if (!wakeLock || wakeLock.released) wakeLock = await navigator.wakeLock.request('screen');
     } else if (wakeLock) {
       await wakeLock.release();
@@ -2313,6 +2427,213 @@ function setupOnboarding(){
   $('onboardDialog').showModal();
 }
 
+function setAppMode(mode, persist=true){
+  if (trainingSession && trainingSession.phase !== 'done' && mode !== 'training') return;
+  appMode = mode === 'training' ? 'training' : 'competition';
+  $('competitionMode').setAttribute('aria-pressed', String(appMode === 'competition'));
+  $('trainingMode').setAttribute('aria-pressed', String(appMode === 'training'));
+  $('trainingPanel').hidden = appMode !== 'training';
+  for (const id of ['planBox','raceBoard','log']) $(id).hidden = appMode !== 'competition';
+  document.querySelector('.hud').hidden = appMode !== 'competition';
+  document.querySelector('.stepper').hidden = appMode !== 'competition';
+  document.querySelector('.legs').hidden = appMode !== 'competition';
+  if (persist) try { localStorage.setItem(appModeKey,appMode); } catch (_) {}
+  if (appMode === 'training') {
+    updateTrainingConfig();
+    renderTrainingLog();
+    requestAnimationFrame(() => $('trainingPanel').scrollIntoView({behavior:reduceMotion()?'auto':'smooth',block:'start'}));
+  }
+}
+
+function trainingSport(){ return document.querySelector('[data-training-sport][aria-pressed="true"]')?.dataset.trainingSport || 'row'; }
+function trainingUnit(sport){ return sport === 'row' ? 'm' : 'km'; }
+function trainingSportName(sport){ return {row:'Rudern',bike:'Radfahren',run:'Laufen'}[sport]; }
+function trainingNumber(id,min,max){
+  const value=Number(String($(id).value).replace(',','.'));
+  return Number.isFinite(value)&&value>=min&&value<=max?value:null;
+}
+function readTrainingHistory(){
+  try { const rows=JSON.parse(localStorage.getItem(trainingHistoryKey)||'[]'); return Array.isArray(rows)?rows:[]; } catch(_){ return []; }
+}
+function writeTrainingHistory(rows){ try { localStorage.setItem(trainingHistoryKey,JSON.stringify(rows.slice(0,100))); } catch(_){} }
+function trainingSignature(config){
+  return [config.sport,config.kind,config.targetMode,config.targetDistance||0,config.durationMin||0,config.reps||0,config.intervalDistance||0].join('|');
+}
+function trainingBestRecord(config){
+  const rows=readTrainingHistory().filter(row=>row.signature===trainingSignature(config));
+  if (!rows.length) return null;
+  return config.targetMode==='time'
+    ? rows.reduce((best,row)=>Number(row.distance)>Number(best.distance)?row:best)
+    : rows.reduce((best,row)=>Number(row.workTime)<Number(best.workTime)?row:best);
+}
+function updateTrainingConfig(){
+  const sport=trainingSport(), kind=$('trainingKind').value, target=$('trainingTarget').value, unit=trainingUnit(sport);
+  $('trainingPanel').dataset.sport=sport;
+  $('trainingTitle').textContent=kind==='interval'?'Intervalltraining':'Einzeltraining';
+  $('trainingTargetWrap').hidden=kind==='interval';
+  $('trainingDistanceWrap').hidden=kind==='interval'||target==='time';
+  $('trainingDurationWrap').hidden=kind==='interval'||target!=='time';
+  $('trainingRepsWrap').hidden=kind!=='interval';
+  $('trainingIntervalWrap').hidden=kind!=='interval';
+  $('trainingRestWrap').hidden=kind!=='interval';
+  $('trainingDistanceLabel').textContent='Zieldistanz ('+unit+')';
+  $('trainingIntervalLabel').textContent='Intervall ('+unit+')';
+  $('trainingDistanceNowLabel').textContent='Aktuelle Distanz am Gerät ('+unit+')';
+}
+function setTrainingSport(sport){
+  document.querySelectorAll('[data-training-sport]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.trainingSport===sport)));
+  const defaults={row:{distance:2000,interval:500},bike:{distance:10,interval:1},run:{distance:5,interval:.5}}[sport];
+  $('trainingDistance').value=String(defaults.distance);
+  $('trainingInterval').value=String(defaults.interval);
+  updateTrainingConfig();
+}
+function trainingConfig(){
+  const sport=trainingSport(),kind=$('trainingKind').value,targetMode=kind==='interval'?'distance':$('trainingTarget').value;
+  const config={sport,kind,targetMode};
+  if(kind==='interval'){
+    config.reps=trainingNumber('trainingReps',2,50);
+    config.intervalDistance=trainingNumber('trainingInterval',.1,sport==='row'?50000:500);
+    config.restSec=trainingNumber('trainingRest',0,1800);
+    config.targetDistance=config.reps&&config.intervalDistance?config.reps*config.intervalDistance:null;
+  }else if(targetMode==='time') config.durationMin=trainingNumber('trainingDuration',1,600);
+  else config.targetDistance=trainingNumber('trainingDistance',.1,sport==='row'?50000:500);
+  return config;
+}
+function trainingTotalNow(){ return trainingSession?trainingSession.elapsed+(trainingSession.running?Date.now()-trainingSession.start:0):0; }
+function trainingPhaseNow(){ return trainingSession?trainingSession.phaseElapsed+(trainingSession.running?Date.now()-trainingSession.phaseStart:0):0; }
+function trainingWorkNow(){ return trainingSession?trainingSession.workElapsed+(trainingSession.running&&trainingSession.phase==='work'?Date.now()-trainingSession.workStart:0):0; }
+function trainingDistanceNow(){
+  if(!trainingSession)return 0;
+  const raw=String($('trainingDistanceNow').value||'').trim();
+  const manual=Number(raw.replace(',','.'));
+  if(raw!==''&&Number.isFinite(manual)&&manual>=0)return manual;
+  return trainingSession.completed*(trainingSession.intervalDistance||0);
+}
+function trainingMetric(sport,distance,ms){
+  if(!(distance>0&&ms>0))return {main:'–',meta:'Distanz eingeben'};
+  if(sport==='row') return {main:paceValue(ms/(distance/500)),meta:'min / 500 m'};
+  const speed=distance/(ms/3600000);
+  if(sport==='run') return {main:de(speed,1)+' km/h',meta:paceValue(ms/distance)+' min/km'};
+  return {main:de(speed,1)+' km/h',meta:'Durchschnittsgeschwindigkeit'};
+}
+function freezeTraining(){
+  if(!trainingSession?.running)return;
+  const now=Date.now();
+  trainingSession.elapsed+=now-trainingSession.start;
+  trainingSession.phaseElapsed+=now-trainingSession.phaseStart;
+  if(trainingSession.phase==='work')trainingSession.workElapsed+=now-trainingSession.workStart;
+  trainingSession.running=false;trainingSession.start=null;trainingSession.phaseStart=null;trainingSession.workStart=null;
+}
+function startTraining(){
+  const config=trainingConfig();
+  if(!config.targetDistance&&!config.durationMin){ status('Bitte gültige Trainingswerte eingeben.'); return; }
+  const now=Date.now();
+  trainingSession={...config,signature:trainingSignature(config),phase:'work',elapsed:0,start:now,running:true,phaseElapsed:0,phaseStart:now,workElapsed:0,workStart:now,completed:0,splits:[],saved:false};
+  $('trainingLive').style.display='';$('trainingAction').disabled=false;$('trainingPause').textContent='Pause';
+  $('trainingDistanceNow').value='';$('trainingResult').hidden=true;$('trainingLog').hidden=true;
+  $('trainingLiveKicker').textContent=trainingSportName(config.sport)+' · '+(config.kind==='interval'?'Intervalltraining':'Einzeltraining');
+  $('trainingAction').textContent=config.kind==='interval'?(de(config.intervalDistance,2)+' '+trainingUnit(config.sport)+' geschafft'):'Training beenden';
+  $('trainingSplitLabel').textContent=config.kind==='interval'?'Letztes Intervall':'Ziel';
+  document.body.classList.add('training-active');
+  cue();syncWakeLock();renderTraining();
+}
+function resumeTraining(){
+  if(!trainingSession||trainingSession.phase==='done')return;
+  const now=Date.now();trainingSession.running=true;trainingSession.start=now;trainingSession.phaseStart=now;
+  if(trainingSession.phase==='work')trainingSession.workStart=now;
+  $('trainingPause').textContent='Pause';syncWakeLock();
+}
+function pauseTraining(){
+  if(!trainingSession)return;
+  if(trainingSession.running){freezeTraining();$('trainingPause').textContent='Fortsetzen';}
+  else resumeTraining();
+  syncWakeLock();renderTraining();
+}
+function completeTrainingInterval(){
+  if(!trainingSession||trainingSession.phase!=='work'||!trainingSession.running)return;
+  const now=Date.now(),split=trainingPhaseNow();
+  trainingSession.workElapsed+=now-trainingSession.workStart;
+  trainingSession.completed+=1;trainingSession.splits.push(split);trainingSession.phaseElapsed=0;trainingSession.phaseStart=now;trainingSession.workStart=null;
+  trainingSession.phase='rest';
+  cue();
+  if(trainingSession.completed>=trainingSession.reps){ finishTraining(); return; }
+  $('trainingAction').disabled=true;
+}
+function finishTraining(){
+  if(!trainingSession||trainingSession.phase==='done')return;
+  freezeTraining();trainingSession.phase='done';
+  const distance=trainingDistanceNow()||trainingSession.targetDistance||0;
+  trainingSession.distance=distance;
+  document.body.classList.remove('training-active');$('trainingLive').style.display='none';$('trainingResult').hidden=false;$('trainingLog').hidden=false;
+  const metric=trainingMetric(trainingSession.sport,distance,trainingSession.workElapsed);
+  $('trainingResultTime').textContent=fmt(trainingSession.elapsed);
+  $('trainingResultWork').textContent=fmt(trainingSession.workElapsed);
+  $('trainingResultDistance').textContent=de(distance,2)+' '+trainingUnit(trainingSession.sport);
+  $('trainingResultAverage').textContent=metric.main;$('trainingResultAverageMeta').textContent=metric.meta;
+  const best=trainingBestRecord(trainingSession);
+  if(!best)$('trainingResultComparison').textContent='Erste gespeicherte Einheit dieser Art – sie wird deine Vergleichsbasis.';
+  else if(trainingSession.targetMode==='time'){
+    const delta=distance-Number(best.distance);$('trainingResultComparison').textContent=(delta>=0?'+':'−')+de(Math.abs(delta),2)+' '+trainingUnit(trainingSession.sport)+' gegenüber deiner Bestleistung.';
+  }else{
+    const delta=trainingSession.workElapsed-Number(best.workTime);$('trainingResultComparison').textContent=(delta<=0?'−':'+')+fmt(Math.abs(delta))+(delta<=0?' schneller':' langsamer')+' als deine Bestzeit.';
+  }
+  $('trainingSave').disabled=false;$('trainingSave').textContent='Training speichern';cue();syncWakeLock();renderTrainingLog();
+  requestAnimationFrame(()=>$('trainingResult').scrollIntoView({behavior:reduceMotion()?'auto':'smooth',block:'start'}));
+}
+function renderTraining(){
+  if(!trainingSession)return;
+  const s=trainingSession,totalMs=trainingTotalNow(),phaseMs=trainingPhaseNow(),workMs=trainingWorkNow();
+  if(s.running&&s.phase==='rest'&&phaseMs>=s.restSec*1000){
+    const now=Date.now();s.phase='work';s.phaseElapsed=0;s.phaseStart=now;s.workStart=now;$('trainingAction').disabled=false;cue();
+  }
+  if(s.running&&s.kind==='single'&&s.targetMode==='time'&&totalMs>=s.durationMin*60000){finishTraining();return;}
+  const rest=s.phase==='rest',shown=rest?Math.max(0,s.restSec*1000-trainingPhaseNow()):totalMs;
+  $('trainingClock').textContent=fmt(shown);
+  $('trainingPhase').textContent=s.running?(rest?'Pause – nächstes Intervall startet automatisch':'Training läuft'):'Pausiert';
+  $('trainingProgress').textContent=s.kind==='interval'?(rest?'Pause nach '+s.completed+' / '+s.reps:'Intervall '+(s.completed+1)+' / '+s.reps):(s.targetMode==='time'?'Ziel '+de(s.durationMin,0)+' Minuten':'Ziel '+de(s.targetDistance,2)+' '+trainingUnit(s.sport));
+  if(s.kind==='interval')$('trainingDistanceNow').placeholder='Automatisch mindestens '+de(s.completed*s.intervalDistance,2);
+  const distance=trainingDistanceNow(),metric=trainingMetric(s.sport,distance,workMs);
+  $('trainingAverage').textContent=metric.main;$('trainingAverageMeta').textContent=metric.meta;
+  const best=trainingBestRecord(s),bestNode=$('trainingBest'),deltaNode=$('trainingDelta');
+  bestNode.className='';deltaNode.className='';
+  if(!best){bestNode.textContent='–';$('trainingBestMeta').textContent='Noch keine gleiche Einheit';deltaNode.textContent='–';$('trainingDeltaMeta').textContent='Nach dem ersten Speichern verfügbar';}
+  else if(s.targetMode==='time'){
+    bestNode.textContent=de(best.distance,2)+' '+trainingUnit(s.sport);$('trainingBestMeta').textContent='Größte Distanz';
+    const delta=distance-Number(best.distance);deltaNode.textContent=(delta>=0?'+':'−')+de(Math.abs(delta),2)+' '+trainingUnit(s.sport);deltaNode.className=delta>=0?'is-fast':'is-slow';$('trainingDeltaMeta').textContent='Aktuelle Distanz zur Bestleistung';
+  }else{
+    bestNode.textContent=fmt(best.workTime);$('trainingBestMeta').textContent='Schnellste aktive Zeit';
+    const projected=distance>0?workMs/distance*s.targetDistance:0;
+    if(projected>0){const delta=projected-Number(best.workTime);deltaNode.textContent=(delta<=0?'−':'+')+fmt(Math.abs(delta));deltaNode.className=delta<=0?'is-fast':'is-slow';$('trainingDeltaMeta').textContent=delta<=0?'Voraussichtlich schneller':'Voraussichtlich langsamer';}
+    else{deltaNode.textContent='–';$('trainingDeltaMeta').textContent='Distanz für Prognose eingeben';}
+  }
+  const last=s.splits.at(-1);$('trainingSplit').textContent=last?fmt(last):'–';$('trainingSplitMeta').textContent=last?'Abschnitt '+s.completed:'Noch kein Abschnitt';
+}
+function saveTraining(){
+  if(!trainingSession||trainingSession.phase!=='done'||trainingSession.saved)return;
+  const rows=readTrainingHistory();rows.unshift({signature:trainingSession.signature,sport:trainingSession.sport,kind:trainingSession.kind,targetMode:trainingSession.targetMode,targetDistance:trainingSession.targetDistance||0,durationMin:trainingSession.durationMin||0,reps:trainingSession.reps||0,intervalDistance:trainingSession.intervalDistance||0,restSec:trainingSession.restSec||0,elapsed:trainingSession.elapsed,workTime:trainingSession.workElapsed,distance:trainingSession.distance,splits:trainingSession.splits,date:new Date().toLocaleString('de-DE')});writeTrainingHistory(rows);
+  trainingSession.saved=true;$('trainingSave').disabled=true;$('trainingSave').textContent='Gespeichert';renderTrainingLog();
+}
+function newTraining(){
+  trainingSession=null;document.body.classList.remove('training-active');$('trainingLive').style.display='';$('trainingResult').hidden=true;$('trainingConfig').hidden=false;$('trainingLog').hidden=false;$('trainingPause').textContent='Pause';renderTrainingLog();
+}
+function renderTrainingLog(){
+  const box=$('trainingLogEntries'),rows=readTrainingHistory();box.replaceChildren();
+  if(!rows.length){box.innerHTML='<div class="empty"><strong>Noch kein Einzeltraining gespeichert</strong>Deine Trainingszeiten, Intervalle und Durchschnittswerte erscheinen hier.</div>';return;}
+  rows.slice(0,20).forEach((row,index)=>{
+    const div=document.createElement('div');div.className='training-entry';
+    const metric=trainingMetric(row.sport,Number(row.distance),Number(row.workTime));
+    const title=document.createElement('strong');title.textContent=trainingSportName(row.sport)+' · '+(row.kind==='interval'?(row.reps+' × '+de(row.intervalDistance,2)+' '+trainingUnit(row.sport)):(row.targetMode==='time'?(de(row.durationMin,0)+' Minuten'):(de(row.targetDistance,2)+' '+trainingUnit(row.sport))));
+    const detail=document.createElement('small');detail.textContent=row.date+' · '+fmt(row.workTime)+' aktiv · '+de(row.distance,2)+' '+trainingUnit(row.sport)+' · Ø '+metric.main+(row.kind==='interval'?' · '+row.splits.length+' Intervalle':'');
+    const del=document.createElement('button');del.type='button';del.className='ghost smallbtn';del.textContent='Löschen';del.addEventListener('click',async()=>{if(await ask('Dieses Training löschen?','Löschen')){const next=readTrainingHistory();next.splice(index,1);writeTrainingHistory(next);renderTrainingLog();}});
+    div.append(title,detail,del);box.append(div);
+  });
+}
+
+function cancelTraining(){
+  if(!trainingSession){newTraining();return;}
+  ask('Aktuelles Training wirklich abbrechen?','Abbrechen').then(ok=>{if(ok){freezeTraining();newTraining();syncWakeLock();}});
+}
+
 document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => selectPreset(b.dataset.preset)));
 document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => startLeg(b.dataset.start)));
 document.querySelectorAll('[data-stop]').forEach(b => b.addEventListener('click', () => stopLeg(b.dataset.stop, true)));
@@ -2355,6 +2676,19 @@ $('fullBtn').addEventListener('click', toggleFullscreen);
 $('installBtn').addEventListener('click', installApp);
 $('watchStart').addEventListener('click', () => commandWatch('start'));
 $('watchStop').addEventListener('click', () => commandWatch('stop'));
+$('competitionMode').addEventListener('click',()=>setAppMode('competition'));
+$('trainingMode').addEventListener('click',()=>setAppMode('training'));
+$('trainingBack').addEventListener('click',()=>setAppMode('competition'));
+document.querySelectorAll('[data-training-sport]').forEach(button=>button.addEventListener('click',()=>setTrainingSport(button.dataset.trainingSport)));
+$('trainingKind').addEventListener('change',updateTrainingConfig);
+$('trainingTarget').addEventListener('change',updateTrainingConfig);
+$('trainingStart').addEventListener('click',startTraining);
+$('trainingAction').addEventListener('click',()=>trainingSession?.kind==='interval'?completeTrainingInterval():finishTraining());
+$('trainingPause').addEventListener('click',pauseTraining);
+$('trainingCancel').addEventListener('click',cancelTraining);
+$('trainingSave').addEventListener('click',saveTraining);
+$('trainingNew').addEventListener('click',newTraining);
+$('trainingDistanceNow').addEventListener('input',renderTraining);
 $('athlete').addEventListener('input', () => {
   saveSettings();
   fillRaceMeta();
@@ -2394,6 +2728,7 @@ try {
 } catch (_) {}
 
 restoreSession();
+try { setAppMode(localStorage.getItem(appModeKey)==='training'?'training':'competition',false); } catch(_){ setAppMode('competition',false); }
 document.addEventListener('visibilitychange', () => {
   saveSession();
   updateResults();
@@ -2411,7 +2746,7 @@ if (restored) requestAnimationFrame(() => {
   (raceStage >= 6 ? $('raceBoard') : document.querySelector('.hud'))
     .scrollIntoView({behavior:'auto', block:'start'});
 });
-setInterval(updateResults, 250);
+setInterval(()=>{updateResults();if(trainingSession&&trainingSession.phase!=='done')renderTraining();},250);
 </script>
 </body>
 </html>
